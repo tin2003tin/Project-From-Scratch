@@ -43,12 +43,3 @@ services:
       - "8003:8000"
     volumes:
       - ./storage3:/app
-
-  # client:
-  #   build:
-  #     context: ./client
-  #     dockerfile: Dockerfile.client
-  #   volumes:
-  #     - ./client:/app/client # Mount the client directory
-  #   depends_on:
-  #     - server # Ensure server container is running before client

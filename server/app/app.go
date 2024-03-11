@@ -15,7 +15,7 @@ func CreateApp() *App {
 }
 
 func (app *App) OpenServer(port string, callback func(error)) {
-	var main_domain string = "localhost:"+port;
+	var main_domain string = ":"+port;
 	listener, err := net.Listen("tcp", main_domain);
 	if err != nil {
 		callback(err)

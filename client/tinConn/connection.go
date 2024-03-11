@@ -69,19 +69,19 @@ func handleConnection(protocol *tinPro.TinProtocol) error {
 		return err
 	}
 	fmt.Println("try to send to server...")
-	_, err = conn.Write([]byte(JsonHeader))
+	_, err = conn.Write(append(JsonHeader, '\n'))
 	if err != nil {
 		fmt.Println("Error:", err)
 		return err
 	}
 
-	_, err = conn.Write([]byte(JsonBody))
+	_, err = conn.Write(JsonBody)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return err
 	}
 	
-	_, err = conn.Write([]byte(JsonTail))
+	_, err = conn.Write(JsonTail)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return err

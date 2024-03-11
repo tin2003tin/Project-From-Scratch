@@ -34,12 +34,14 @@ func (app *App)handleClient(conn net.Conn) {
 		fmt.Println(err);
 		return;
 	}
+
 	// Read Tail
 	err = tinPro.ReadTail(&conn, &protocol)
 	if (err != nil) {
 		fmt.Println(err);
 		return;
 	}
+	
 	// Send to route handler
 	handler,params,err := app.handleCommand(&conn, &protocol);
 	if (err != nil) {

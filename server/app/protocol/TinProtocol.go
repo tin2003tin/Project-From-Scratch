@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -71,7 +72,11 @@ func readAndUnmarshal(conn *net.Conn, target interface{}, length int) error {
 		return err
 	}
 	buffer.Write(tempBuffer[:n])
-	if err := json.Unmarshal(buffer.Bytes(), target); err != nil {
+	index := strings.Index(string(buffer.Bytes()), "\n")
+	if index == -1 {
+		index = length;
+	}
+	if err := json.Unmarshal(buffer.Bytes()[:index], target); err != nil {
 		fmt.Println("Error:", err)
 		return err
 	}

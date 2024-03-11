@@ -9,6 +9,7 @@ import (
 
 
 type tinConnection struct {
+	port string
 	tinProtocol tinPro.TinProtocol 
 
 }
@@ -28,22 +29,22 @@ func (tc *tinConnection) Tail(message string, description string) *tinConnection
 	return tc
 }
 
-func CreateTinConnection() *tinConnection {
-	tc := tinConnection{}
+func CreateTinConnection(port string) *tinConnection {
+	tc := tinConnection{port: port}
 	return &tc
 }
 
 func (tc *tinConnection) Run() error {
-	err := handleConnection(&tc.tinProtocol);
+	err := tc.handleConnection(&tc.tinProtocol);
 	if (err != nil) {
 		return err
 	}
 	return nil;	
 }
 
-
-func handleConnection(protocol *tinPro.TinProtocol) error {
-	conn, err := net.Dial("tcp", "localhost:8080")
+func (tc *tinConnection) handleConnection(protocol *tinPro.TinProtocol) error {
+	domain := ":" + tc.port;
+	conn, err := net.Dial("tcp", domain)
 	if err != nil {
 		fmt.Println("Error connecting:", err)		
 		return err
@@ -62,7 +63,7 @@ func handleConnection(protocol *tinPro.TinProtocol) error {
 		fmt.Println("Error:", err)
 		return err
 	}
-
+	fmt.Println(protocol.Body)
 	JsonHeader, err := marshalJsonHeader(protocol);
 	if err != nil {
 		fmt.Println("Error:", err)

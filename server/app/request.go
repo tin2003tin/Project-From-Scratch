@@ -41,9 +41,9 @@ func (app *App)handleClient(conn net.Conn) {
 		fmt.Println(err);
 		return;
 	}
-	
+
 	// Send to route handler
-	handler,params,err := app.handleCommand(&conn, &protocol);
+	handler,params,err := app.handleCommand(&protocol);
 	if (err != nil) {
 		fmt.Println(err);
 		return;
@@ -52,7 +52,7 @@ func (app *App)handleClient(conn net.Conn) {
 }
 
 //Find handler Route and excute that handler
-func (app *App)handleCommand(conn *net.Conn, protocol *tinPro.TinProtocol) (func(Request), map[string]string, error) {
+func (app *App)handleCommand(protocol *tinPro.TinProtocol) (func(Request), map[string]string, error) {
 	index, params := app.findHandlerRoute(protocol.Header.Command, protocol.Header.Path)
 	if index != -1 {
 		return app.Routes[index].Handler, params, nil

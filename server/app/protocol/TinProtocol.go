@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"strings"
 	"time"
 )
 
@@ -49,19 +48,19 @@ func Middleware(header *tpHeader) error {
 }
 
 func ReadHeader(conn *net.Conn,	protocol *TinProtocol) error {
-	return readAndUnmarshal(conn, &protocol.Header, 1024)
+	return readAndUnmarshal(conn, &protocol.Header, 1024, true)
 }
 
 func ReadBody(conn *net.Conn, protocol *TinProtocol) error {
-	return readAndUnmarshal(conn, &protocol.Body, int(protocol.Header.BodyLength))
+	return readAndUnmarshal(conn, &protocol.Body, int(protocol.Header.BodyLength), false)
 }
 
 func ReadTail(conn *net.Conn, protocol *TinProtocol) error {
-	return readAndUnmarshal(conn, &protocol.Tail, int(protocol.Header.TailLength))
+	return readAndUnmarshal(conn, &protocol.Tail, int(protocol.Header.TailLength), false)
 }
 
 
-func readAndUnmarshal(conn *net.Conn, target interface{}, length int) error {
+func readAndUnmarshal(conn *net.Conn, target interface{}, length int, head bool) error {
 	var buffer bytes.Buffer
 	tempBuffer := make([]byte, length)
 	n, err := (*conn).Read(tempBuffer)
@@ -71,11 +70,20 @@ func readAndUnmarshal(conn *net.Conn, target interface{}, length int) error {
 		}
 		return err
 	}
+
+
 	buffer.Write(tempBuffer[:n])
-	index := strings.Index(string(buffer.Bytes()), "\n")
-	if index == -1 {
-		index = length;
+	index := length;
+	if head {
+		index = bytes.Index(tempBuffer[:n], []byte("\n"))
+		if index == -1 {
+			index = n
+		}
 	}
+	if index > buffer.Len() {
+		index = buffer.Len()
+	}
+
 	if err := json.Unmarshal(buffer.Bytes()[:index], target); err != nil {
 		fmt.Println("Error:", err)
 		return err

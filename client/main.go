@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	tinConn.CreateTinConnection("8080").Access(lib.Command.SEND,"/warehouse","1234",lib.VERSION_1_0).Body(tinCreate.Importfile("C:/Users/com/Downloads/ideaIC-2023.3.4.exe")).Run()
+	tinConn.CreateTinConnection("8080").Access(lib.Command.SEND,"/warehouse","1234",lib.VERSION_1_0).Body(tinCreate.Importfile("C:/Users/com/Downloads/PlatformerTutorial-ep28_finale.zip")).Run()
 }

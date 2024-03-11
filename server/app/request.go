@@ -34,7 +34,6 @@ func (app *App)handleClient(conn net.Conn) {
 		fmt.Println(err);
 		return;
 	}
-
 	// Read Tail
 	err = tinPro.ReadTail(&conn, &protocol)
 	if (err != nil) {

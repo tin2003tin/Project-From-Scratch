@@ -59,31 +59,32 @@ func ReadTail(conn *net.Conn, protocol *TinProtocol) error {
 	return readAndUnmarshal(conn, &protocol.Tail, int(protocol.Header.TailLength), false)
 }
 
-
 func readAndUnmarshal(conn *net.Conn, target interface{}, length int, head bool) error {
 	var buffer bytes.Buffer
-	tempBuffer := make([]byte, length)
-	n, err := (*conn).Read(tempBuffer)
-	if err != nil {
-		if err == io.EOF {
-			return nil
-		}
-		return err
-	}
-
-
-	buffer.Write(tempBuffer[:n])
 	index := length;
-	if head {
-		index = bytes.Index(tempBuffer[:n], []byte("\n"))
-		if index == -1 {
-			index = n
+	for {
+		tempBuffer := make([]byte, length)
+		n, err := (*conn).Read(tempBuffer)
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
+			return err
 		}
-	}
-	if index > buffer.Len() {
-		index = buffer.Len()
-	}
 
+		buffer.Write(tempBuffer[:n])
+		
+		if head {
+			index = bytes.Index(tempBuffer[:n], []byte("\n"))
+			if index == -1 {
+				index = n
+			}
+		}
+		if index > buffer.Len() {
+			index = buffer.Len()
+		}
+		break;
+	}
 	if err := json.Unmarshal(buffer.Bytes()[:index], target); err != nil {
 		fmt.Println("Error:", err)
 		return err

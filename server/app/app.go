@@ -23,9 +23,7 @@ func (app *App) OpenServer(port string, callback func(error)) {
 	defer listener.Close()
 	fmt.Println("Listen to port :"+port);
 	for {
-		fmt.Println("Test"+port);
 		conn,err := listener.Accept();
-		fmt.Println("Test")
 		if err != nil {
 			callback(err)
 			continue

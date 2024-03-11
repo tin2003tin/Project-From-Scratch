@@ -49,12 +49,6 @@ func handleConnection(protocol *tinPro.TinProtocol) error {
 		return err
 	}
 
-	_, err = conn.Write([]byte("Hello"))
-	if err != nil {
-		fmt.Println("Error:", err)
-		return err
-	}
-
 	defer conn.Close()
 
 	JsonTail, err := marshalJsonTail(protocol);
@@ -93,15 +87,15 @@ func handleConnection(protocol *tinPro.TinProtocol) error {
 		return err
 	}
 
-	//Handle Response
-	// buffer := make([]byte, 1024)
-    // _, err = conn.Read(buffer)
-    // if err != nil {
-    //     fmt.Println("Error reading response:", err.Error())
-    //     return nil;
-    // }
-	//  response := string(buffer)
-    // fmt.Println("Response from server: \n", response)
+	// Handle Response
+	buffer := make([]byte, 1024)
+    _, err = conn.Read(buffer)
+    if err != nil {
+        fmt.Println("Error reading response:", err.Error())
+        return nil;
+    }
+	 response := string(buffer)
+    fmt.Println("Response from server: \n", response)
 	return nil
 }
 

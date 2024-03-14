@@ -20,6 +20,5 @@
 # Go workspace file
 go.work
 
-client/Object
-server/warehouse
+client/object
 fileStorage/warehouse

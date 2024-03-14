@@ -13,33 +13,33 @@ services:
     build:
       context: .
     ports:
-      - "8080:8080"
+      - "8000:8000"
     volumes:
       - ./manage_files:/app
 
-  #File storage Node 1
-  storage_server1:
-    build:
-      context: .
-    ports:
-      - "8001:8000"
-    volumes:
-      - ./storage1:/app
+  # #File storage Node 1
+  # storage_server1:
+  #   build:
+  #     context: .
+  #   ports:
+  #     - "8001:8000"
+  #   volumes:
+  #     - ./storage1:/app
 
-  #File storage Node 2
-  storage_server2:
-    build:
-      context: .
-    ports:
-      - "8002:8000"
-    volumes:
-      - ./storage2:/app
+  # #File storage Node 2
+  # storage_server2:
+  #   build:
+  #     context: .
+  #   ports:
+  #     - "8002:8000"
+  #   volumes:
+  #     - ./storage2:/app
 
-  #File storage Node 3
-  storage_server3:
-    build:
-      context: .
-    ports:
-      - "8003:8000"
-    volumes:
-      - ./storage3:/app
+  # #File storage Node 3
+  # storage_server3:
+  #   build:
+  #     context: .
+  #   ports:
+  #     - "8003:8000"
+  #   volumes:
+  #     - ./storage3:/app

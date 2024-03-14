@@ -1,54 +1,37 @@
 package warehouse
 
 import (
-	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
+	"errors"
 	"server/app"
+	"server/tinConn"
 )
 
-func LoadFileToWH(req app.Request) {
-	filename := req.Params["file"];
-	 filePath := filepath.Join("warehouse", filename)
-	 fileContent, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		fmt.Println("Error reading file:", err)
-		return
+func LoadFileToWH(req app.Request,res app.Response) error {
+	tc := tinConn.CreateTinConnection("8000");
+	tc.Access(req.Protocol.GetHeader().Command,req.Protocol.GetHeader().Path,req.Protocol.GetHeader().SecretKey,req.Protocol.GetHeader().Version)
+    response := tc.Run()
+	if (response.GetResponse().StatusCode == 400) {
+		app.ErrorToClient(*res.Conn, res.ReqProtocol, errors.New(response.GetResponse().Message))
+		return nil;
 	}
-	_, err = (*req.Conn).Write(fileContent)
-	if err != nil {
-		fmt.Println("Error sending file contents to client:", err)
-		return
+	err := res.SetMessage(response.GetResponse().Message).SetBody(response.GetData().Data).Send();
+	if (err != nil) {
+		return err
 	}
+	return nil;
 }
 
-func LookAllFileWH(req app.Request) {
-	dir := "./warehouse"
-
-    d, err := os.Open(dir)
-    if err != nil {
-        fmt.Println("Error opening directory:", err)
-        return
-    }
-    defer d.Close()
-
-    files, err := d.Readdir(-1)
-    if err != nil {
-        fmt.Println("Error reading directory:", err)
-        return
-    }
-
-	var warehouseFiles []string
-    for _, file := range files {
-        if file.Mode().IsRegular() {
-            warehouseFiles = append(warehouseFiles, file.Name()+", ")
-        }
-    }
-
-    _, err = (*req.Conn).Write([]byte(fmt.Sprintf("Files in %s:\n %v", dir, warehouseFiles)))
-    if err != nil {
-        fmt.Println("Error sending file contents to client:", err)
-        return
-    }
+func LookAllFileWH(req app.Request,res app.Response) error {
+	tc := tinConn.CreateTinConnection("8000");
+	tc.Access(req.Protocol.GetHeader().Command,req.Protocol.GetHeader().Path,req.Protocol.GetHeader().SecretKey,req.Protocol.GetHeader().Version)
+    response := tc.Run()
+	if (response.GetResponse().StatusCode == 400) {
+		app.ErrorToClient(*res.Conn, res.ReqProtocol, errors.New(response.GetResponse().Message))
+		return nil;
+	}
+	err := res.SetMessage(response.GetResponse().Message).SetBody(response.GetData().Data).Send();
+	if (err != nil) {
+		return err
+	}
+	return nil;
 }

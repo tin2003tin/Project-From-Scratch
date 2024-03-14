@@ -3,59 +3,50 @@ package app
 import (
 	"fmt"
 	"net"
+	"system/app/lib"
 	tinPro "system/app/protocol"
 )
 
 type Request struct {
 	Conn *net.Conn
-	Protocol *tinPro.TinProtocol
+	Protocol *tinPro.TinReqProtocol
 	Params map[string]string
 }
 
-func (app *App)handleClient(conn net.Conn) {
-    defer conn.Close()
-	var protocol tinPro.TinProtocol;
-	// Read Header
-	err := tinPro.ReadHeader(&conn, &protocol)
+func (app *App) handleClient(conn net.Conn) {
+	var protocol tinPro.TinReqProtocol;
+	//Read Header
+	err := tinPro.ReadHeader(conn, &protocol)
 	if (err != nil) {
-		fmt.Println(err);
-		return;
-	}
-	fmt.Println(protocol.Header)
-	// Read Middleware
-	err = tinPro.Middleware(&protocol.Header);
-	if (err != nil) {
-		fmt.Println(err);
+		err = ErrorToClient(conn,&protocol,err)
+		if (err != nil) {
+			fmt.Println(err)
+		}
 		return
 	}
-	// Read Body
-	err = tinPro.ReadBody(&conn, &protocol)
-	if (err != nil) {
-		fmt.Println(err);
-		return;
+	fmt.Println(protocol.GetHeader())
+	//Read Header && Tail
+	if (protocol.GetHeader().Command == lib.Command.SEND) {
+		tinPro.ReadBody(conn, &protocol)
+		tinPro.ReadTail(conn, &protocol)
 	}
-	// Read Tail
-	err = tinPro.ReadTail(&conn, &protocol)
-	if (err != nil) {
-		fmt.Println(err);
-		return;
-	}
-
-	// Send to route handler
+	fmt.Println(protocol.GetBody())
+	//Send to route handler
 	handler,params,err := app.handleCommand(&protocol);
 	if (err != nil) {
-		fmt.Println(err);
-		return;
+		err = ErrorToClient(conn,&protocol,err)
+		if (err != nil) {
+			fmt.Println(err)
+		}
+		return
 	}
-	handler(Request{Conn: &conn,Protocol: &protocol, Params: params})
-}
-
-//Find handler Route and excute that handler
-func (app *App)handleCommand(protocol *tinPro.TinProtocol) (func(Request), map[string]string, error) {
-	index, params := app.findHandlerRoute(protocol.Header.Command, protocol.Header.Path)
-	if index != -1 {
-		return app.Routes[index].Handler, params, nil
+	err =  handler(Request{Conn: &conn,Protocol: &protocol, Params: params}, 
+		           Response{Conn: &conn,ReqProtocol: &protocol,ResProtocol: &tinPro.TinResProtocol{}})
+	if (err != nil) {
+		err = ErrorToClient(conn, &protocol,err)
+		if (err != nil) {
+			fmt.Println(err)
+		}
+		return
 	}
-	return nil, nil, fmt.Errorf("handler not found for path: %s with command: %s", protocol.Header.Path, protocol.Header.Command)
 }
-

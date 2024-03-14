@@ -1,0 +1,36 @@
+[Word Associations]
+talkactive P
+eccentric N
+cheerful P
+indecisive N
+assertive P
+self-confident P 
+tactful P
+sensible P 
+well-linked P 
+charming P
+anxious N
+clumsy P
+apprehensive N 
+cynical N
+egotistical N 
+gullible N
+
+[Using self- or well-]
+absorbed self
+assured self
+centred self
+confident self
+congratulatory self
+deprecating self
+important self
+reliant self
+adjusted
+behaved well
+bred well
+brought-up well
+dressed well
+educated well
+informed well
+mannered well
+rounded well

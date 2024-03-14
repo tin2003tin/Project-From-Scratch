@@ -1,44 +1,80 @@
 package app
 
 import (
-	"encoding/json"
 	"fmt"
 	"net"
+	tinPro "system/app/protocol"
 )
-
-type Response struct {
-	Message    string
-	StatusCode int
-}
 
 const (
 	SuccessStatusCode = 200
-	ErrorStatusCode   = 404
+	ErrorStatusCode   = 400
 )
 
-func CreateResponseMessage(message string) ([]byte, error) {
-    response := Response{
-        Message:    message,
-        StatusCode: SuccessStatusCode,
-    }
-    jsonBytes, err := json.Marshal(response)
-    if (err != nil ) {
-        return nil,err;
-    }
-    return jsonBytes, nil;
+type Response struct {
+	Conn *net.Conn
+	ReqProtocol *tinPro.TinReqProtocol
+	ResProtocol *tinPro.TinResProtocol
+}
+func (res *Response) SetMessage(message string) (*Response)  {
+	res.ResProtocol.SetHeader(*res.ReqProtocol,SuccessStatusCode,message,"text",0,0);
+	return res;
 }
 
-func HandleError(conn *net.Conn, err error) {
-	if err != nil {
-		errorMsg := struct{ Error string }{Error: err.Error()}
-		jsonBytes, jsonErr := json.Marshal(errorMsg)
-		if jsonErr != nil {
-			fmt.Println("Error marshaling JSON:", jsonErr)
-			return
+func (res *Response) SetBody(data interface{}) (*Response)  {
+	res.ResProtocol.SetBody(data)
+	return res;
+}
+
+func ErrorToClient(conn net.Conn, protocol *tinPro.TinReqProtocol, err error) error {
+	if (err != nil) {
+		tr := tinPro.TinResProtocol{}
+		tr.SetHeader(*protocol,ErrorStatusCode,err.Error(),"Error",0,0);
+		//Marshal the Protocol
+		JsonHeader, JsonBody, JsonTail, err := tinPro.MarshalProtocol(&tr);
+		if (err != nil) {
+			return err
 		}
-		_, writeErr := (*conn).Write(jsonBytes)
-		if writeErr != nil {
-			fmt.Println("Error writing error message:", writeErr)
+		//Write the connection
+		_, err = conn.Write(append(JsonHeader, '\n'))
+		if err != nil {
+			return err
+		}
+		_, err = conn.Write(JsonBody)
+		if err != nil {
+			return err
+		}
+		_, err = conn.Write(JsonTail)
+		if err != nil {
+			return err
 		}
 	}
+	return nil;
+}
+
+func (res *Response) Send() error {
+	//Marshal the Protocol
+	JsonHeader, JsonBody, JsonTail, err := tinPro.MarshalProtocol(res.ResProtocol);
+	if (err != nil) {
+		return err
+	}
+
+	fmt.Println("try to send to response...")
+
+	//Write the connection
+	_, err = (*res.Conn).Write(append(JsonHeader, '\n'))
+	if err != nil {
+		return err
+	}
+
+	_, err = (*res.Conn).Write(JsonBody)
+	if err != nil {
+		return err
+	}
+
+	_, err = (*res.Conn).Write(JsonTail)
+	if err != nil {
+		return err
+	}
+	return nil
 }

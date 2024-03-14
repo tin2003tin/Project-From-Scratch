@@ -2,11 +2,12 @@ package warehouse
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"server/app"
 	"server/tinConn"
-	"server/tinConn/lib"
 )
+
 type File struct {
 	Content []byte
 	Size    float64
@@ -50,7 +51,18 @@ func MappingFile (body interface{}) *File {
 	return file;
 }
 
-func SaveFileToWH(req app.Request) {
-	file := (MappingFile(req.Protocol.Body.Data))
-	tinConn.CreateTinConnection("8000").Access(lib.Command.SEND,"/warehouse","1234",lib.VERSION_1_0).Body(file).Run();
+func SaveFileToWH(req app.Request,res app.Response) error {
+	tc := tinConn.CreateTinConnection("8000");
+	tc.Access(req.Protocol.GetHeader().Command,req.Protocol.GetHeader().Path,req.Protocol.GetHeader().SecretKey,req.Protocol.GetHeader().Version)
+	tc.Body((MappingFile(req.Protocol.GetBody().Data)))
+	response := tc.Run()
+	if (response.GetResponse().StatusCode == 400) {
+		app.ErrorToClient(*res.Conn, res.ReqProtocol, errors.New(response.GetResponse().Message))
+		return nil
+	}
+	err := res.SetMessage(response.GetResponse().Message).SetBody(response.GetData().Data).Send()
+	if (err != nil) {
+		return err
+	}
+	return nil;
 }

@@ -1,7 +1,6 @@
 package tinConn
 
 import (
-	"encoding/json"
 	"fmt"
 	"net"
 	tinPro "server/tinConn/protocol"
@@ -10,8 +9,14 @@ import (
 
 type tinConnection struct {
 	port string
-	tinProtocol tinPro.TinProtocol 
+	tinProtocol tinPro.TinReqProtocol
+	errorHandler func(error)
+	response Response
+}
 
+func CreateTinConnection(port string) *tinConnection {
+	tc := tinConnection{port: port}
+	return &tc
 }
 
 func (tc *tinConnection) Access(command, path, secretKey, version string) *tinConnection {
@@ -29,109 +34,54 @@ func (tc *tinConnection) Tail(message string, description string) *tinConnection
 	return tc
 }
 
-func CreateTinConnection(port string) *tinConnection {
-	tc := tinConnection{port: port}
-	return &tc
-}
-
-func (tc *tinConnection) Run() error {
-	err := tc.handleConnection(&tc.tinProtocol);
-	if (err != nil) {
-		return err
+func (tc *tinConnection) Run() *Response {
+	if !tc.isErrorhandlerExisted() {
+		tc.errorHandler = handleError
 	}
-	return nil;	
+	tc.handleConnection(&tc.tinProtocol,tc.errorHandler);
+	return &tc.response
 }
 
-func (tc *tinConnection) handleConnection(protocol *tinPro.TinProtocol) error {
+func (tc *tinConnection) Error(callback func(error)) {
+	tc.errorHandler = callback;
+}
+
+func (tc *tinConnection) isErrorhandlerExisted() bool{
+	return tc.errorHandler != nil;
+}
+
+func (tc *tinConnection) handleConnection(protocol *tinPro.TinReqProtocol, callback func(error)) {
+	//Check protocol valid 
+	err := protocol.IsValid()
+	if (err != nil) {
+		callback(err)
+		return
+	}
+
+	//Open connection
 	domain := ":" + tc.port;
 	conn, err := net.Dial("tcp", domain)
-	if err != nil {
-		fmt.Println("Error connecting:", err)		
-		return err
+	if err != nil {	
+		callback(err)
+		return 
 	}
-
 	defer conn.Close()
 
-	JsonTail, err := marshalJsonTail(protocol);
-	if err != nil {
-		fmt.Println("Error:", err)
-		return err
-	}
-	JsonBody, err := marshalJsonBody(protocol);
-	if err != nil {
-		fmt.Println("Error:", err)
-		return err
-	}
-
-	JsonHeader, err := marshalJsonHeader(protocol);
-	if err != nil {
-		fmt.Println("Error:", err)
-		return err
-	}
-	fmt.Println("try to send to server...")
-	_, err = conn.Write(append(JsonHeader, '\n'))
-	if err != nil {
-		fmt.Println("Error:", err)
-		return err
-	}
-
-	_, err = conn.Write(JsonBody)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return err
-	}
-	
-	_, err = conn.Write(JsonTail)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return err
+	//Send Request to server
+	err = sendRequest(conn, protocol);
+	if (err != nil) {
+		callback(err)
+		return
 	}
 
 	// Handle Response
-	buffer := make([]byte, 1024)
-    _, err = conn.Read(buffer)
-    if err != nil {
-        fmt.Println("Error reading response:", err.Error())
-        return nil;
-    }
-	 response := string(buffer)
-    fmt.Println("Response from server: \n", response)
-	return nil
+	err = tc.response.readReponse(conn);
+	if (err != nil) {
+		callback(err)
+		return 
+	}
 }
 
-func marshalJsonHeader(protocol *tinPro.TinProtocol) ([]byte, error) {
-	JsonHeader, err := json.Marshal(protocol.Header)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil,err
-	}
-	return JsonHeader, nil;
-}
-
-func marshalJsonBody(protocol *tinPro.TinProtocol) ([]byte, error) {
-	JsonBody, err := json.Marshal(protocol.Body)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil, err
-	}
-	if len(JsonBody) != 0 {
-
-    protocol.Header.BodyLength = int64(len(JsonBody))
-    protocol.Header.BodyType = "text"
-
-	}
-	return JsonBody, nil;
-}
-
-func marshalJsonTail(protocol *tinPro.TinProtocol) ([]byte, error) {
-	JsonTail, err := json.Marshal(protocol.Tail)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil, err
-	}
-	if len(JsonTail) != 0 {
-
-    protocol.Header.TailLength = int64(len(JsonTail))
-	}
-	return JsonTail, nil;
+func handleError(err error) {
+	fmt.Println("(Client site) Request Error", err)
 }

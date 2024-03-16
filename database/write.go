@@ -93,6 +93,26 @@ func main() {
 		fmt.Println("Error adding row to employee table:", err)
 		return
 	}	
+	err = employeeTable.AddRow(map[string]interface{}{
+	"id":     3,
+	"name":   "Nut not Jake",
+	"gmail":  "nutnotjake@gmail.com",
+	"gender": "Male",
+	})
+	if err != nil {
+		fmt.Println("Error adding row to employee table:", err)
+		return
+	}
+	err = employeeTable.AddRow(map[string]interface{}{
+	"id":     4,
+	"name":   "Nia",
+	"gmail":  "niania@gmail.com",
+	"gender": "Female",
+	})
+	if err != nil {
+		fmt.Println("Error adding row to employee table:", err)
+		return
+	}
 
 	// Add rows to the salary table
 	err = salaryTable.AddRow(map[string]interface{}{
@@ -113,33 +133,5 @@ func main() {
 		fmt.Println("Error adding row to salary table:", err)
 		return
 	}	
-
-	// Print the database structure
-	fmt.Println("Database Name:", database.Name)
-	for _, table := range database.Tables {
-		fmt.Println("Table Name:", table.Metadata.Name)
-		fmt.Println("Table Columns:", table.Metadata.Columns)
-		fmt.Println("Table Primary Keys:", table.Metadata.PrimaryKeys)
-		fmt.Println("Table Foreign Keys:", table.Metadata.ForeignKeys)
-		fmt.Println("Table Indexes:")
-		for indexName, index := range table.IndexTable {
-			fmt.Println("  - Index Name:", indexName)
-			fmt.Println("    Index Columns:", index.Columns)
-			fmt.Println("    Index Rows:", index.Rows)
-			fmt.Println("    Index Unique:", index.Unique)
-			fmt.Println("    Index Using:", index.Using)
-			fmt.Println("    Index Comment:", index.Comment)
-			fmt.Println("    Index Tablespace:", index.Tablespace)
-			fmt.Println("    Index Include Columns:", index.Include)
-			fmt.Println("    Index Predicate:", index.Predicate)
-			fmt.Println("    Index Fill Factor:", index.FillFactor)
-		}
-		fmt.Println("Table Rows:")
-		for _, row := range table.Metadata.Rows {
-			fmt.Println("  - Row Data:", row.Data)
-			fmt.Println("    Created At:", row.CreatedAt)
-			fmt.Println("    Updated At:", row.UpdatedAt)
-		}
-		fmt.Println("----------------------")
-	}
+	database.SaveDatabase("companyDatabase");
 }

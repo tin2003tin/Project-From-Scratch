@@ -55,7 +55,7 @@ func (db *Database) GetTable(name string) (*table.Table, error) {
 }
 
 func (db *Database) SaveDatabase(filename string) error {
-	file, err := os.Create(filename)
+	file, err := os.Create(filename+".bin")
 	if err != nil {
 		return err
 	}

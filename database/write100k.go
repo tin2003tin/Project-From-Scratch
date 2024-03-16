@@ -44,4 +44,5 @@ func main() {
 		employeeTable.AddRow(map[string]interface{}{"id": i, "name": fmt.Sprintf("Employee%d", i), "department": "Finance", "salary": 5500, "age": 40})
 	}
 	employeeTable.SerializeRows()
+	fmt.Println("Write 100k completed")
 }

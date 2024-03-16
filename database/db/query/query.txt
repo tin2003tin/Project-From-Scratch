@@ -1,0 +1,46 @@
+package table
+
+import "errors"
+
+// QueryRows retrieves rows from the table based on given conditions without using indexes
+func (t *Table) QueryRows(conditions map[string]interface{}) ([]Row, error) {
+	if len(conditions) == 0 {
+		return t.Metadata.Rows, nil
+	}
+
+	columnName, columnNameExists := conditions["columnName"].(string)
+	value, valueExists := conditions["value"]
+
+	if !columnNameExists || !valueExists {
+		return nil, errors.New("columnName or value is missing")
+	}
+
+	var matchedRows []Row
+
+	for _, row := range t.Metadata.Rows {
+		if val, ok := row.Data[columnName]; ok && val == value {
+			matchedRows = append(matchedRows, row)
+		}
+	}
+
+	if len(matchedRows) == 0 {
+		return nil, errors.New("no matching rows found")
+	}
+	return matchedRows, nil
+}
+
+// CreateQueryConditions creates query conditions from a list of maps
+func CreateQueryConditions(conditions ...map[string]interface{}) map[string]interface{} {
+	query := make(map[string]interface{})
+	for _, c := range conditions {
+		for key, value := range c {
+			query[key] = value
+		}
+	}
+	return query
+}
+
+// CreateQueryEverything creates an empty query condition
+func CreateQueryEverything() map[string]interface{} {
+	return map[string]interface{}{}
+}

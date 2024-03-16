@@ -1,0 +1,23 @@
+package table
+
+import "errors"
+
+// QueryRowsByIndex queries rows from the table using the specified index
+func (t *Table) QueryRowsByIndex(indexName string, key []interface{}) ([]Row, error) {
+	index, ok := t.IndexTable[indexName]
+	if !ok {
+		return nil, errors.New("index not found: " + indexName)
+	}
+	result, err := index.Search(key)
+	if err != nil {
+		return nil, err
+	}
+	// Fetch rows based on the result from the index
+	var rows []Row
+	for _, val := range result {
+		if row, ok := val.(Row); ok {
+			rows = append(rows, row)
+		}
+	}
+	return rows, nil
+}

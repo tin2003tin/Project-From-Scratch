@@ -11,12 +11,6 @@ func (t *Table) AddIdColumn() error {
 	if err != nil {
 		return err
 	}
-
-	// Add an index for the "id" column
-	err = t.AddIndex("id", []string{"id"}, true, HashIndex, "Index for the id column", "default", nil, "", 70)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -24,6 +18,11 @@ func (t *Table) AddColumn(name string, dataType string, length int, precision in
 	// Validate input parameters
 	if name == "" {
 		return errors.New("column name cannot be empty")
+	}
+	for _, col := range t.Metadata.Columns {
+		if col.Name == name {
+			return fmt.Errorf("column '%s' already exists in the table", name)
+		}
 	}
 	// Create the new column
 	newColumn := Column{
@@ -51,6 +50,12 @@ func (t *Table) AddColumn(name string, dataType string, length int, precision in
 			return err
 		}
 	}
+
+	// Update the metadata file after adding the column
+	if err := t.updateMetadataFile(); err != nil {
+		return fmt.Errorf("failed to update metadata file: %v", err)
+	}
+	
 	return nil
 }
 
@@ -107,7 +112,7 @@ func (t *Table) AddIndex(name string, columns []string, unique bool, indexType I
 	index := Index{
 		Name:       name,
 		Columns:    make(map[int]*Column),
-		Rows: 		make(map[string]*Row),		
+		Rows:       make(map[string]*Row),
 		Unique:     unique,
 		Using:      indexType,
 		Comment:    comment,
@@ -131,9 +136,13 @@ func (t *Table) AddIndex(name string, columns []string, unique bool, indexType I
 			return fmt.Errorf("column '%s' not found in the table", colName)
 		}
 	}
-
 	// Add the index to the table's index table
 	t.IndexTable[index.Name] = &index
+	// Create the index file (.tti) and write the index data
+	if err := createIndexFile(t, t.Metadata.MetadataPath); err != nil {
+		return fmt.Errorf("failed to create index file: %v", err)
+	}
+
 	return nil
 }
 

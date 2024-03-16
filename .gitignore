@@ -22,3 +22,4 @@ go.work
 
 client/object
 fileStorage/warehouse
+database/colletion/*

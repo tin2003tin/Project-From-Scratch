@@ -12,7 +12,7 @@ type Table struct {
 	Metadata    TableMetadata    // Table metadata
 	IndexTable  map[string]*Index // Indexes on the table
 }
-
+	
 // TableMetadata represents metadata about a table
 type TableMetadata struct {
 	Name         string         // Table name
@@ -26,6 +26,7 @@ type TableMetadata struct {
 	Inheritance  []string       // List of inherited tables (for table inheritance)
 	Owner        string         // Owner or creator of the table
 	LastModified time.Time      // Last modification timestamp
+	MetadataPath string
 }
 
 // Column represents a column in a table

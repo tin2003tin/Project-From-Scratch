@@ -113,6 +113,16 @@ func main() {
 		fmt.Println("Error adding row to employee table:", err)
 		return
 	}
+	err = employeeTable.AddRow(map[string]interface{}{
+	"id":     5,
+	"name":   "Martin",
+	"gmail":  "martin@gmail.com",
+	"gender": "Male",
+	})
+	if err != nil {
+		fmt.Println("Error adding row to employee table:", err)
+		return
+	}
 
 	// Add rows to the salary table
 	err = salaryTable.AddRow(map[string]interface{}{
@@ -133,5 +143,5 @@ func main() {
 		fmt.Println("Error adding row to salary table:", err)
 		return
 	}	
-	database.SaveDatabase("companyDatabase");
+
 }

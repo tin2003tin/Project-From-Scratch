@@ -13,7 +13,7 @@ func (t *Table) AddIdColumn() error {
 	}
 
 	// Add an index for the "id" column
-	err = t.AddIndex("id_index", []string{"id"}, true, HashIndex, "Index for the id column", "default", nil, "", 70)
+	err = t.AddIndex("id", []string{"id"}, true, HashIndex, "Index for the id column", "default", nil, "", 70)
 	if err != nil {
 		return err
 	}
@@ -41,11 +41,21 @@ func (t *Table) AddColumn(name string, dataType string, length int, precision in
 		Comment:      comment,
 	}
 	// Add the new column to the table's metadata
-	if (newColumn.PrimaryKey) {
-		t.Metadata.PrimaryKeys = append(t.Metadata.PrimaryKeys, newColumn.Name)
-	}
 	t.Metadata.Columns = append(t.Metadata.Columns, newColumn)
+	if (newColumn.PrimaryKey) {
+		t.addPrimaryKey(newColumn.Name)
+	}
+	if (newColumn.PrimaryKey || newColumn.Unique) {
+		err := t.AddIndex(newColumn.Name, []string{newColumn.Name}, true, HashIndex, "Index for the " + newColumn.Name, "default", nil, "", 70)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (t *Table) addPrimaryKey(name string) {
+	t.Metadata.PrimaryKeys = append(t.Metadata.PrimaryKeys, name)
 }
 
 func (t *Table) AddRow(columnValues map[string]interface{}) error {
@@ -83,7 +93,6 @@ func (i *Index) AddRowToIndex(row Row) error {
 			indexKey[columnIndex] = value
 		}
 	}
-	fmt.Println(indexKey)
 	// Add the row to the index using the extracted key
 	if len(indexKey) > 0 {
 		i.Rows[fmt.Sprintf("%v", indexKey)] = &row
@@ -98,6 +107,7 @@ func (t *Table) AddIndex(name string, columns []string, unique bool, indexType I
 	index := Index{
 		Name:       name,
 		Columns:    make(map[int]*Column),
+		Rows: 		make(map[string]*Row),		
 		Unique:     unique,
 		Using:      indexType,
 		Comment:    comment,

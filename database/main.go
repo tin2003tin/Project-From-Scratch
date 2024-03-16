@@ -34,13 +34,86 @@ func main() {
 	}
 
 	// Add columns to the employee table
-	employeeTable.AddIdColumn() // Add id column
-	employeeTable.AddColumn("name", "string", 0, 0, 0, false, false, false, false, nil, "", "")
-	employeeTable.AddColumn("gmail", "string", 0, 0, 0, false, false, true, false, nil, "", "")
-	employeeTable.AddColumn("gender", "string", 0, 0, 0, false, false, false, false, nil, "", "")
+	err = employeeTable.AddIdColumn() // Add id column
+	if err != nil {
+		fmt.Println("Error adding column:", err)
+		return
+	}	
+	err = employeeTable.AddColumn("name", "string", 0, 0, 0, false, false, false, false, nil, "", "")
+	if err != nil {
+		fmt.Println("Error adding column:", err)
+		return
+	}
+	err = employeeTable.AddColumn("gmail", "string", 0, 0, 0, false, false, true, false, nil, "", "")
+	if err != nil {
+		fmt.Println("Error adding column:", err)
+		return
+	}
+	err = employeeTable.AddColumn("gender", "string", 0, 0, 0, false, false, false, false, nil, "", "")
+	if err != nil {
+		fmt.Println("Error adding column:", err)
+		return
+	}
+
 	// Add columns to the salary table
-	salaryTable.AddIdColumn()
-	salaryTable.AddColumn("name", "string", 0, 0, 0, false, false, false, false, nil, "", "")
+	err = salaryTable.AddIdColumn()
+	if err != nil {
+		fmt.Println("Error adding column:", err)
+		return
+	}
+	err = salaryTable.AddColumn("working_age", "int", 0, 0, 0, false, false, false, false, nil, "", "")
+	if err != nil {
+		fmt.Println("Error adding column:", err)
+		return
+	}
+	err = salaryTable.AddColumn("salary", "int", 0, 0, 0, false, false, false, false, nil, "", "")
+	if err != nil {
+		fmt.Println("Error adding column:", err)
+		return
+	}
+
+	// Add rows to the employee table
+	err = employeeTable.AddRow(map[string]interface{}{
+	"id":     1,
+	"name":   "John Doe",
+	"gmail":  "johndoe@example.com",
+	"gender": "Male",
+	})
+	if err != nil {
+		fmt.Println("Error adding row to employee table:", err)
+		return
+	}	
+	err = employeeTable.AddRow(map[string]interface{}{
+	"id":     2,
+	"name":   "Tin Siriwid",
+	"gmail":  "tin@gmail.com",
+	"gender": "Male",
+	})
+	if err != nil {
+		fmt.Println("Error adding row to employee table:", err)
+		return
+	}	
+
+	// Add rows to the salary table
+	err = salaryTable.AddRow(map[string]interface{}{
+	"id":          1,
+	"working_age": 10,
+	"salary":      50000,
+	})
+	if err != nil {
+		fmt.Println("Error adding row to salary table:", err)
+		return
+	}	
+	err = salaryTable.AddRow(map[string]interface{}{
+	"id":          2,
+	"working_age": 15,
+	"salary":      70000,
+	})
+	if err != nil {
+		fmt.Println("Error adding row to salary table:", err)
+		return
+	}	
+
 	// Print the database structure
 	fmt.Println("Database Name:", database.Name)
 	for _, table := range database.Tables {
@@ -52,6 +125,7 @@ func main() {
 		for indexName, index := range table.IndexTable {
 			fmt.Println("  - Index Name:", indexName)
 			fmt.Println("    Index Columns:", index.Columns)
+			fmt.Println("    Index Rows:", index.Rows)
 			fmt.Println("    Index Unique:", index.Unique)
 			fmt.Println("    Index Using:", index.Using)
 			fmt.Println("    Index Comment:", index.Comment)
@@ -59,6 +133,12 @@ func main() {
 			fmt.Println("    Index Include Columns:", index.Include)
 			fmt.Println("    Index Predicate:", index.Predicate)
 			fmt.Println("    Index Fill Factor:", index.FillFactor)
+		}
+		fmt.Println("Table Rows:")
+		for _, row := range table.Metadata.Rows {
+			fmt.Println("  - Row Data:", row.Data)
+			fmt.Println("    Created At:", row.CreatedAt)
+			fmt.Println("    Updated At:", row.UpdatedAt)
 		}
 		fmt.Println("----------------------")
 	}

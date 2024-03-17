@@ -2,6 +2,6 @@
 ### go run .\server\main.go เปิด server 
 ### go run .\client\main.go เปิด client
 ### go run .\fileSystem\main.go เปิด fileSystem
-### go run .\database\write100k.go และ go run .\database\query.go เพื่อทดสอบ database
+### go run .\database\write.go และ go run .\database\query.go เพื่อทดสอบ database
 
-##### Time stemp 16/3/2024
+##### Time stemp 17/3/2024

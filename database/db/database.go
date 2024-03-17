@@ -15,8 +15,6 @@ type Database struct {
 	MetadataPath  string                // Path to the metadata file
 }
 
-
-
 func CreateDatabase(name string) (*Database, error) {
 	// Create the database instance
 	db := &Database{

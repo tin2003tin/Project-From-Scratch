@@ -12,6 +12,7 @@ type Condition struct {
 	Value      interface{} // Value to compare against
 }
 
+
 // QueryRows returns rows from the table that match the specified conditions
 func QueryRows(t *table.Table , conditions []Condition) ([]table.Row, error) {
 	var matchedRows []table.Row

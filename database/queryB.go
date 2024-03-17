@@ -9,7 +9,7 @@ import (
 
 func main() {
 	startLoadDatabase := time.Now()
-	database, err := db.GetDataBase("companyB")
+	database, err := db.GetDataBase("B_company")
 	if (err != nil) {
 		fmt.Println(err)
 		return 

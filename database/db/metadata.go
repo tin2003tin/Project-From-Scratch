@@ -9,7 +9,6 @@ import (
 	"strings"
 )
 
-// createMetadataFile creates a metadata file and writes database metadata to it
 func createMetadataFile(db *Database, filePath string) error {
 	// Open or create the metadata file
 	metaFile, err := os.Create(filePath)
@@ -125,7 +124,6 @@ func readTTRFile(t *table.Table) error {
 	fmt.Printf("Rows read from '%s' successfully\n", ttrFilePath)
 	return nil
 }
-
 
 func readTable(db *Database, metaFilePath string) error {
 	tablesPath := filepath.Join(filepath.Dir(metaFilePath))

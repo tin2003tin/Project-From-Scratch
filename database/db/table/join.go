@@ -14,14 +14,14 @@ const (
 	FullJoin
 )
 
-type Where struct {
+type On struct {
 	Self string // Name of the column to check condition against
 	Operator string // Operator for comparison (e.g., "=", ">", "<", etc.)
 	Another string
 }
 
 // Join performs a join operation between the current table and another table
-func (t *Table) Join(another *Table, joinType JoinType, conditions []Where) (*Table, error) {
+func (t *Table) Join(another *Table, joinType JoinType, conditions []On) (*Table, error) {
 	// Validate input parameters
 	if another == nil {
 		return nil, fmt.Errorf("another table is nil")
@@ -58,7 +58,7 @@ func (t *Table) Join(another *Table, joinType JoinType, conditions []Where) (*Ta
 	return nil, fmt.Errorf("join operation failed")
 }
 
-func (t *Table) performInnerJoin(another *Table, conditions []Where) (*Table, error) {
+func (t *Table) performInnerJoin(another *Table, conditions []On) (*Table, error) {
 	joinedRows := make([]Row, 0)
 	joinedColumns := make([]Column, 0) 
 
@@ -86,7 +86,7 @@ func (t *Table) performInnerJoin(another *Table, conditions []Where) (*Table, er
 	return &Table{Metadata: TableMetadata{Rows: joinedRows,Columns: joinedColumns }}, nil
 }
 
-func (t *Table) checkAllConditions(row1, row2 Row, conditions []Where) bool {
+func (t *Table) checkAllConditions(row1, row2 Row, conditions []On) bool {
 	for _, condition := range conditions {
 		if !t.checkSingleCondition(row1, row2, condition) {
 			return false
@@ -95,7 +95,7 @@ func (t *Table) checkAllConditions(row1, row2 Row, conditions []Where) bool {
 	return true
 }
 
-func (t *Table) checkSingleCondition(row1, row2 Row, condition Where) bool {
+func (t *Table) checkSingleCondition(row1, row2 Row, condition On) bool {
 	switch (condition.Operator) {
 		case "=" :
 			return row1.Data[condition.Self] == row2.Data[condition.Another]

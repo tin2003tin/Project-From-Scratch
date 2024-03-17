@@ -1,6 +1,7 @@
 package query
 
 import (
+	"database/db/lib"
 	table "database/db/table"
 	"errors"
 	"reflect"
@@ -11,7 +12,6 @@ type Condition struct {
 	Operator   string      // Operator for comparison (e.g., "=", ">", "<", etc.)
 	Value      interface{} // Value to compare against
 }
-
 
 // QueryRows returns rows from the table that match the specified conditions
 func QueryRows(t *table.Table , conditions []Condition) ([]table.Row, error) {
@@ -32,17 +32,17 @@ func QueryRows(t *table.Table , conditions []Condition) ([]table.Row, error) {
 			// Perform type assertion to handle comparison based on the value's type
 			switch v := value.(type) {
 			case int:
-				if !compareInt(v, cond.Operator, cond.Value) {
+				if !lib.CompareInt(v, cond.Operator, cond.Value) {
 					matched = false
 					break
 				}
 			case float64:
-				if !compareFloat64(v, cond.Operator, cond.Value) {
+				if !lib.CompareFloat64(v, cond.Operator, cond.Value) {
 					matched = false
 					break
 				}
 			case string:
-				if !compareString(v, cond.Operator, cond.Value) {
+				if !lib.CompareString(v, cond.Operator, cond.Value) {
 					matched = false
 					break
 				}
@@ -60,60 +60,3 @@ func QueryRows(t *table.Table , conditions []Condition) ([]table.Row, error) {
 	return matchedRows, nil
 }
 
-// compareInt performs comparison for integer values
-func compareInt(value int, operator string, target interface{}) bool {
-	targetValue, ok := target.(int)
-	if !ok {
-		return false
-	}
-	switch operator {
-	case "=":
-		return value == targetValue
-	case "<":
-		return value < targetValue
-	case "<=":
-		return value <= targetValue
-	case ">":
-		return value > targetValue
-	case ">=":
-		return value >= targetValue
-	default:
-		return false
-	}
-}
-
-// compareFloat64 performs comparison for float64 values
-func compareFloat64(value float64, operator string, target interface{}) bool {
-	targetValue, ok := target.(float64)
-	if !ok {
-		return false
-	}
-	switch operator {
-	case "=":
-		return value == targetValue
-	case "<":
-		return value < targetValue
-	case "<=":
-		return value <= targetValue
-	case ">":
-		return value > targetValue
-	case ">=":
-		return value >= targetValue
-	default:
-		return false
-	}
-}
-
-// compareString performs comparison for string values
-func compareString(value string, operator string, target interface{}) bool {
-	targetValue, ok := target.(string)
-	if !ok {
-		return false
-	}
-	switch operator {
-	case "=":
-		return value == targetValue
-	default:
-		return false
-	}
-}

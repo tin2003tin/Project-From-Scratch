@@ -11,10 +11,10 @@ func QueryRowByIndex(index *table.Index, target interface{}) (*table.Row, error)
 		return nil, errors.New("index is nil")
 	}
 	key := fmt.Sprintf("%v", target) 
-	indexKey := make(map[int]interface{})
-	for columnIndex, column := range index.Columns {
+	indexKey := make(map[string]interface{})
+	for _, column := range index.Columns {
 		if column.Name == index.Name { 
-			indexKey[columnIndex] = key 
+			indexKey[column.Name] = key 
 			break 
 		}
 	}

@@ -19,11 +19,11 @@ func main() {
 	for _,table := range database.Tables {
 		table.PrintAsTable()
 	}
-	where_condition := []table.Where{
+	on_condition := []table.On{
 		{Self: "id", Operator: "=", Another: "employee_id"},
 	}
 
-	joinedTable, err := database.Registry.Tables["employee"].Join(database.Registry.Tables["salary"],table.InnerJoin,where_condition)
+	joinedTable, err := database.Registry.Tables["employee"].Join(database.Registry.Tables["salary"],table.InnerJoin,on_condition)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return

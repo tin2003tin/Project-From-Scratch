@@ -16,10 +16,11 @@ func main() {
 	fmt.Println("Database's name:", database.Name)
 	fmt.Println("-----------------")
 	userTable := database.Tables[0]; 
+	fmt.Println(userTable.IndexTable["email"])
 	userTable.PrintAsTable();
 	conditions := []query.Condition{
 		query.Condition{ColumnName: "age", Operator: ">=", Value: 50},
-		// query.Condition{ColumnName: "gender", Operator: "=", Value: "female"},
+		query.Condition{ColumnName: "gender", Operator: "=", Value: "female"},
 		// query.Condition{ColumnName: "fullName", Operator: "=", Value: "Isabella Clark"},
 	}
 	fmt.Println("-----------------")

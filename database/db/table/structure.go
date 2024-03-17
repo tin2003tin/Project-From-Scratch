@@ -65,7 +65,7 @@ type ForeignKey struct {
 // Index represents an index on a table
 type Index struct {
 	Name       string             // Index name
-	Columns    map[int]*Column
+	Columns    map[string]*Column
 	Rows       map[string]*Row    // Columns included in the index with additional properties
 	Unique     bool               // Indicates if the index enforces uniqueness
 	Using      IndexType          // Index method

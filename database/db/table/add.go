@@ -92,10 +92,10 @@ func (t *Table) AddRow(columnValues map[string]interface{}) error {
 
 func (i *Index) AddRowToIndex(row Row) error {
 	// Extract relevant values from the new row based on the indexed columns
-	indexKey := make(map[int]interface{})
-	for columnIndex, column := range i.Columns {
+	indexKey := make(map[string]interface{})
+	for _, column := range i.Columns {
 		if value, ok := row.Data[column.Name]; ok {
-			indexKey[columnIndex] = value
+			indexKey[column.Name] = value
 		}
 	}
 	// Add the row to the index using the extracted key
@@ -111,7 +111,7 @@ func (t *Table) AddIndex(name string, columns []string, unique bool, indexType I
 	// Create the index object
 	index := Index{
 		Name:       name,
-		Columns:    make(map[int]*Column),
+		Columns:    make(map[string]*Column),
 		Rows:       make(map[string]*Row),
 		Unique:     unique,
 		Using:      indexType,
@@ -123,11 +123,11 @@ func (t *Table) AddIndex(name string, columns []string, unique bool, indexType I
 	}
 
 	// Populate the index columns
-	for idx, colName := range columns {
+	for _, colName := range columns {
 		found := false
 		for _, col := range t.Metadata.Columns {
 			if col.Name == colName {
-				index.Columns[idx] = &col
+				index.Columns[colName] = &col
 				found = true
 				break
 			}

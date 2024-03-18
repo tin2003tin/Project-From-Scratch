@@ -2,36 +2,36 @@ package main
 
 import (
 	"database/db"
+	"database/db/table"
 	"fmt"
 )
 
 func main() {
-	database,err :=db.GetDataBase("D_product")
-	if (err != nil) {
+	database, err := db.GetDataBase("D_product")
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	database.Tables[0].PrintAsTable()
-	// conditions := []del.Condition{
-	// 	{ColumnName: "name", Operator: "=", Value: "Banana"},
-	// }
-	fmt.Println((database.Tables[0].IndexTable["id"]).Rows)
+	conditions := []table.Condition{
+		{ColumnName: "name", Operator: "=", Value: "Banana"},
+	}
 
-	// if err := del.DeleteRow(database.Tables[0], conditions); err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
+	if err := database.Tables[0].DeleteRow(conditions); err != nil {
+		fmt.Println(err)
+		return
+	}
 
-	// conditions = []del.Condition{
-	// 	{ColumnName: "name", Operator: "=", Value: "Pear"},
-	// }
+	conditions = []table.Condition{
+		{ColumnName: "name", Operator: "=", Value: "Pear"},
+	}
 
-	// if err := del.DeleteRow(database.Tables[0], conditions); err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
+	if err := database.Tables[0].DeleteRow(conditions); err != nil {
+		fmt.Println(err)
+		return
+	}
 
-	// database.Tables[0].PrintAsTable()
-	// fmt.Println((database.Tables[0].IndexTable["id"]).Rows)
+	database.Tables[0].PrintAsTable()
+	fmt.Println((database.Tables[0].IndexTable.Rows))
 	// database.Tables[0].SerializeRows()
 }

@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Create a new database named "Company"
-	database, err := db.CreateDatabase("B_company")
+	database, err := db.CreateDatabase("1m")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -44,7 +44,7 @@ func main() {
 	employeeTable.AddRow(map[string]interface{}{"id": 3, "name": "Mike Johnson", "department": "Finance", "salary": 5500, "age": 40})
 	employeeTable.AddRow(map[string]interface{}{"id": 4, "name": "Emily Brown", "department": "Marketing", "salary": 7000, "age": 28})
 	employeeTable.AddRow(map[string]interface{}{"id": 5, "name": "Chris Wilson", "department": "IT", "salary": 5200, "age": 32})
-	for i := 6; i <= 100000; i++ {
+	for i := 6; i <= 1000000; i++ {
 		employeeTable.AddRow(map[string]interface{}{"id": i, "name": fmt.Sprintf("Employee%d", i), "department": "Finance", "salary": 5500, "age": 40})
 	}
 	employeeTable.SerializeRows()

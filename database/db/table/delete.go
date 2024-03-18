@@ -1,18 +1,11 @@
-package delete
+package table
 
 import (
 	"database/db/lib"
-	"database/db/table"
 	"fmt"
 )
 
-type Condition struct {
-	ColumnName string      // Name of the column to check condition against
-	Operator   string      // Operator for comparison (e.g., "=", ">", "<", etc.)
-	Value      interface{} // Value to compare against
-}
-
-func DeleteRow(t *table.Table, conditions []Condition) error {
+func (t *Table) DeleteRow(conditions []Condition) error {
 	if t == nil {
 		return fmt.Errorf("table is nil")
 	}
@@ -36,8 +29,7 @@ func DeleteRow(t *table.Table, conditions []Condition) error {
 	return nil
 }
 
-
-func checkAllConditions(row table.Row, conditions []Condition) bool {
+func checkAllConditions(row Row, conditions []Condition) bool {
 	for _, condition := range conditions {
 		if !checkSingleCondition(row, condition) {
 			return false
@@ -46,8 +38,7 @@ func checkAllConditions(row table.Row, conditions []Condition) bool {
 	return true
 }
 
-
-func checkSingleCondition(row table.Row, condition Condition) bool {
+func checkSingleCondition(row Row, condition Condition) bool {
 	value, ok := row.Data[condition.ColumnName]
 	if !ok {
 		return false
@@ -64,19 +55,16 @@ func checkSingleCondition(row table.Row, condition Condition) bool {
 	}
 }
 
-func deleteFromIndex(t *table.Table, row table.Row) error {
-	for _,index := range t.IndexTable {
-		key := fmt.Sprintf("%v", row.Data[index.Name])
-		indexKey := make(map[string]interface{})
-		for _, column := range index.Columns {
-			if column.Name == index.Name { 
-				indexKey[column.Name] = key 
-				break 
-			}
+func deleteFromIndex(t *Table, row Row) error {
+	key := fmt.Sprintf("%v", row.Data[t.IndexTable.Name])
+	indexKey := make(map[string]interface{})
+	for _, column := range t.IndexTable.Columns {
+		if column.Name == t.IndexTable.Name {
+			indexKey[column.Name] = key
+			break
 		}
-		fmt.Println(indexKey)
-		delete_row := fmt.Sprintf("%v", indexKey)
-		delete(index.Rows, delete_row)
 	}
-	return nil;
+	delete_row := fmt.Sprintf("%v", indexKey)
+	delete(t.IndexTable.Rows, delete_row)
+	return nil
 }

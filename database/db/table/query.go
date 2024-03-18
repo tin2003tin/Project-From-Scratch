@@ -1,8 +1,7 @@
-package query
+package table
 
 import (
 	"database/db/lib"
-	table "database/db/table"
 	"errors"
 	"reflect"
 )
@@ -14,8 +13,8 @@ type Condition struct {
 }
 
 // QueryRows returns rows from the table that match the specified conditions
-func QueryRows(t *table.Table , conditions []Condition) ([]table.Row, error) {
-	var matchedRows []table.Row
+func (t *Table) QueryRows(conditions []Condition) ([]Row, error) {
+	var matchedRows []Row
 
 	// Iterate through each row in the table
 	for _, row := range t.Metadata.Rows {
@@ -59,4 +58,3 @@ func QueryRows(t *table.Table , conditions []Condition) ([]table.Row, error) {
 
 	return matchedRows, nil
 }
-

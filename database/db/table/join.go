@@ -15,9 +15,9 @@ const (
 )
 
 type On struct {
-	Self string // Name of the column to check condition against
+	Self     string // Name of the column to check condition against
 	Operator string // Operator for comparison (e.g., "=", ">", "<", etc.)
-	Another string
+	Another  string
 }
 
 // Join performs a join operation between the current table and another table
@@ -36,12 +36,12 @@ func (t *Table) Join(another *Table, joinType JoinType, conditions []On) (*Table
 	}
 	switch joinType {
 	case InnerJoin:
-		joinedData,err := t.performInnerJoin(another, conditions)
-		if (err != nil) {
+		joinedData, err := t.performInnerJoin(another, conditions)
+		if err != nil {
 			return nil, err
 		}
 		return joinedData, nil
-		
+
 	case LeftJoin:
 		// Perform left join
 		// Implement your logic here
@@ -60,30 +60,66 @@ func (t *Table) Join(another *Table, joinType JoinType, conditions []On) (*Table
 
 func (t *Table) performInnerJoin(another *Table, conditions []On) (*Table, error) {
 	joinedRows := make([]Row, 0)
-	joinedColumns := make([]Column, 0) 
+	joinedColumns := make([]Column, 0)
+	addedColumns := make(map[string]bool)
+	for _, col := range t.Metadata.Columns {
+		joinedColumns = append(joinedColumns, col)
+		addedColumns[col.Name] = true
+	}
 
-	joinedColumns  = append(joinedColumns , t.Metadata.Columns...)
-	joinedColumns  = append(joinedColumns , another.Metadata.Columns...)
+	// Add columns from another table to joinedColumns
+	for _, col := range another.Metadata.Columns {
+		if addedColumns[col.Name] {
+			// Handle column name conflict
+			count := 2
+			newName := fmt.Sprintf("%s_%d", col.Name, count)
+			for addedColumns[newName] {
+				count++
+				newName = fmt.Sprintf("%s_%d", col.Name, count)
+			}
+			col.Name = newName
+		}
+		joinedColumns = append(joinedColumns, col)
+		addedColumns[col.Name] = true
+	}
 
 	for _, row := range t.Metadata.Rows {
+		// Iterate over rows in another.Metadata.Rows
 		for _, anotherRow := range another.Metadata.Rows {
 			if t.checkAllConditions(row, anotherRow, conditions) {
+				addedRows := make(map[string]bool)
 				joinedRow := Row{
 					Data: make(map[string]interface{}),
 				}
+
+				// Copy data from row to joinedRow
 				for key, value := range row.Data {
 					joinedRow.Data[key] = value
+					addedRows[key] = true
+
 				}
 
+				// Add data from anotherRow to joinedRow, handling column name conflicts
 				for key, value := range anotherRow.Data {
-					joinedRow.Data[key] = value
+					newKey := key
+					count := 1
+					// Keep incrementing the count until we find a unique key
+					for addedRows[newKey] {
+						count++
+						newKey = fmt.Sprintf("%s_%d", key, count)
+					}
+					addedRows[newKey] = true
+					joinedRow.Data[newKey] = value
 				}
 
+				// Add joinedRow to joinedRows
 				joinedRows = append(joinedRows, joinedRow)
 			}
 		}
 	}
-	return &Table{Metadata: TableMetadata{Rows: joinedRows,Columns: joinedColumns }}, nil
+
+	// Create and return a new Table instance with joinedRows and joinedColumns
+	return &Table{Metadata: TableMetadata{Rows: joinedRows, Columns: joinedColumns}}, nil
 }
 
 func (t *Table) checkAllConditions(row1, row2 Row, conditions []On) bool {
@@ -96,11 +132,11 @@ func (t *Table) checkAllConditions(row1, row2 Row, conditions []On) bool {
 }
 
 func (t *Table) checkSingleCondition(row1, row2 Row, condition On) bool {
-	switch (condition.Operator) {
-		case "=" :
-			return row1.Data[condition.Self] == row2.Data[condition.Another]
-		case "!=" :
-			return row1.Data[condition.Self] != row2.Data[condition.Another]
+	switch condition.Operator {
+	case "=":
+		return row1.Data[condition.Self] == row2.Data[condition.Another]
+	case "!=":
+		return row1.Data[condition.Self] != row2.Data[condition.Another]
 	}
-	return false;
+	return false
 }

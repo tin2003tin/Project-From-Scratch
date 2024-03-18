@@ -9,18 +9,18 @@ import (
 )
 
 type Database struct {
-	Name          string                // Database name
-	Tables        []*table.Table        // Slice of tables
-	Registry      *table.TableRegistry  // TableRegistry for managing tables by name
-	MetadataPath  string                // Path to the metadata file
+	Name         string               // Database name
+	Tables       []*table.Table       // Slice of tables
+	Registry     *table.TableRegistry // TableRegistry for managing tables by name
+	MetadataPath string               // Path to the metadata file
 }
 
 func CreateDatabase(name string) (*Database, error) {
 	// Create the database instance
 	db := &Database{
-		Name:     name,
-		Tables:   make([]*table.Table, 0),
-		Registry: &table.TableRegistry{Tables: make(map[string]*table.Table)},
+		Name:         name,
+		Tables:       make([]*table.Table, 0),
+		Registry:     &table.TableRegistry{Tables: make(map[string]*table.Table)},
 		MetadataPath: "./collection/" + name,
 	}
 
@@ -51,16 +51,14 @@ func (db *Database) CreateTable(name string) (*table.Table, error) {
 
 	// Create default metadata
 	metadata := table.TableMetadata{
-		Name: name,
-		Rows: make([]table.Row, 0),
+		Name:         name,
+		Rows:         make([]table.Row, 0),
 		MetadataPath: db.MetadataPath,
 	}
-	// Create the table index table
-	indexTable := make(map[string]*table.Index)
 	// Create and return the Table instance
 	newTable := &table.Table{
-		Metadata:    metadata,
-		IndexTable:  indexTable,
+		Metadata:   metadata,
+		IndexTable: nil,
 	}
 	// Add the new table to the database
 	db.Tables = append(db.Tables, newTable)

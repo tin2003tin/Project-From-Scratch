@@ -8,8 +8,9 @@ import (
 )
 
 func main() {
+	fmt.Println("try to Read...:", "1m")
 	startLoadDatabase := time.Now()
-	database, err := db.GetDataBase("B_company")
+	database, err := db.GetDataBase("1m")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -17,7 +18,7 @@ func main() {
 	loadDuration := time.Since(startLoadDatabase)
 	fmt.Println("Execution Time for Load the Database:", loadDuration)
 	employeeTable, err := database.GetTable("employee")
-	id := 80000
+	id := 500000
 	// Define conditions for querying rows
 	conditions := []table.Condition{
 		{ColumnName: "id", Operator: "=", Value: id}, // Query for the last row

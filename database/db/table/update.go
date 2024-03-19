@@ -1,93 +1,63 @@
 package table
 
 import (
-	"encoding/gob"
 	"fmt"
-	"os"
-	"path/filepath"
 )
 
-func (t *Table) updateMetadataFile() error {
-	// Construct the metadata file path
-	metaFilePath := fmt.Sprintf("%s/%s.ttm", t.Metadata.MetadataPath, t.Metadata.Name)
-	// Open or create the metadata file
-	metaFile, err := os.Create(metaFilePath)
-	if err != nil {
-		return fmt.Errorf("failed to update table metadata file: %v", err)
-	}
-	defer metaFile.Close()
+type Set struct {
+	ColumnName string
+	Value      interface{}
+}
 
-	// Initialize an encoder for writing binary data
-	encoder := gob.NewEncoder(metaFile)
-
-	// Encode and write the updated database metadata to the file
-	if err := encoder.Encode(t.Metadata); err != nil {
-		return fmt.Errorf("failed to encode table's metadata: %v", err)
+func (t *Table) Update(conditions []Condition, sets []Set) error {
+	if t == nil {
+		return fmt.Errorf("table is nil")
 	}
 
-	fmt.Println("Table metadata file updated successfully")
+	// Iterate over each row in the table
+	for i := len(t.Metadata.Rows) - 1; i >= 0; i-- {
+		row := t.Metadata.Rows[i]
+		if checkAllConditions(row, conditions) {
+			for _, set := range sets {
+				if err := updateFromIndex(t, &row, set); err != nil {
+					return err
+				}
+				if err := updateRow(t, &row, set); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
 	return nil
 }
 
-func (t *Table) SerializeRows() error {
-	// Update the index file
-	if err := t.updateIndexFile(); err != nil {
-		return fmt.Errorf("failed to create index file: %v", err)
+func updateRow(t *Table, row *Row, set Set) error {
+	for _, col := range t.Metadata.Columns {
+		if set.ColumnName == col.Name {
+			row.Data[set.ColumnName] = set.Value
+			break
+		}
 	}
-
-	// Construct the path for the .ttr file
-	ttrFilePath := filepath.Join(t.Metadata.MetadataPath, t.Metadata.Name+".ttr")
-
-	// Create or open the .ttr file
-	ttrFile, err := os.Create(ttrFilePath)
-	if err != nil {
-		return fmt.Errorf("failed to create .ttr file: %v", err)
-	}
-	defer ttrFile.Close()
-
-	// Initialize an encoder for writing binary data
-	encoder := gob.NewEncoder(ttrFile)
-
-	// Encode and write the rows to the .ttr file
-	if err := encoder.Encode(t.Metadata.Rows); err != nil {
-		return fmt.Errorf("failed to encode rows: %v", err)
-	}
-
-	fmt.Printf("Rows serialized to '%s' successfully\n", ttrFilePath)
 	return nil
 }
 
-func (t *Table) updateIndexFile() error {
-	indexFilePath := filepath.Join(t.Metadata.MetadataPath, t.Metadata.Name+".tti")
+func updateFromIndex(t *Table, row *Row, set Set) error {
+	indexColumns := t.IndexTable.Columns
+	indexRows := t.IndexTable.Rows
+	for _, column := range indexColumns {
+		if set.ColumnName == column.Name {
+			newTemp := make(map[string]interface{})
+			oldTemp := make(map[string]interface{})
+			key := fmt.Sprintf("%v", row.Data[column.Name])
+			oldTemp[column.Name] = key
+			newTemp[column.Name] = set.Value
+			oldkey := fmt.Sprintf("%v", oldTemp)
+			newKey := fmt.Sprintf("%v", newTemp)
 
-	// Open or create the index file
-	indexFile, err := os.Create(indexFilePath)
-	if err != nil {
-		return fmt.Errorf("failed to update index file: %v", err)
+			indexRows[newKey] = indexRows[oldkey]
+			delete(indexRows, oldkey)
+		}
 	}
-	defer indexFile.Close()
-
-	// Initialize an encoder for writing binary data
-	encoder := gob.NewEncoder(indexFile)
-	var indexTable Index
-
-	indexTable = Index{
-		Name:       t.IndexTable.Name,
-		Columns:    nil,
-		Rows:       nil,
-		Unique:     t.IndexTable.Unique,
-		Using:      t.IndexTable.Using,
-		Comment:    t.IndexTable.Comment,
-		Tablespace: t.IndexTable.Tablespace,
-		Include:    t.IndexTable.Include,
-		Predicate:  t.IndexTable.Predicate,
-		FillFactor: t.IndexTable.FillFactor,
-	}
-	// Encode and write the index data to the file
-	if err := encoder.Encode(indexTable); err != nil {
-		return fmt.Errorf("failed to encode index data: %v", err)
-	}
-
-	fmt.Println("Index file updated successfully:", indexFilePath)
 	return nil
 }

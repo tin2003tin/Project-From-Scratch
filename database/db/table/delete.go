@@ -9,9 +9,6 @@ func (t *Table) DeleteRow(conditions []Condition) error {
 	if t == nil {
 		return fmt.Errorf("table is nil")
 	}
-	if len(conditions) == 0 {
-		return fmt.Errorf("no conditions provided")
-	}
 
 	// Iterate over each row in the table
 	for i := len(t.Metadata.Rows) - 1; i >= 0; i-- {
@@ -56,15 +53,12 @@ func checkSingleCondition(row Row, condition Condition) bool {
 }
 
 func deleteFromIndex(t *Table, row Row) error {
-	key := fmt.Sprintf("%v", row.Data[t.IndexTable.Name])
-	indexKey := make(map[string]interface{})
-	for _, column := range t.IndexTable.Columns {
-		if column.Name == t.IndexTable.Name {
-			indexKey[column.Name] = key
-			break
-		}
+	for _, Column := range t.IndexTable.Columns {
+		indexKey := make(map[string]interface{})
+		key := fmt.Sprintf("%v", row.Data[Column.Name])
+		indexKey[Column.Name] = key
+		delete_row := fmt.Sprintf("%v", indexKey)
+		delete(t.IndexTable.Rows, delete_row)
 	}
-	delete_row := fmt.Sprintf("%v", indexKey)
-	delete(t.IndexTable.Rows, delete_row)
 	return nil
 }

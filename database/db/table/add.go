@@ -40,6 +40,15 @@ func (t *Table) AddColumn(name string, dataType string, length int, primaryKey b
 		Check:      "",
 		Comment:    "",
 	}
+	if newColumn.Default != nil {
+		fmt.Println(newColumn.Default,newColumn.DataType)
+		newDefualt, err := lib.ConvertValue(newColumn.Default, newColumn.DataType, newColumn.Length)
+		if err != nil {
+			return fmt.Errorf("cannot add column, %v %v", newColumn.Name, err)
+		}
+		newColumn.Default = newDefualt
+	}
+
 	// Add the new column to the table's metadata
 	t.Metadata.Columns = append(t.Metadata.Columns, newColumn)
 	if newColumn.PrimaryKey {
@@ -81,12 +90,13 @@ func (t *Table) AddRow(columnValues map[string]interface{}) error {
 		if column.PrimaryKey && columnValues[column.Name] == nil {
 			return errors.New("cannot add row, primary key column not provided: " + column.Name)
 		}
-		newValue, err := lib.ConvertValue(newRow.Data[column.Name], column.DataType, column.Length)
-		if err != nil {
-			return fmt.Errorf("cannot add row, %v %v", column.Name, err)
+		if newRow.Data[column.Name] != nil {
+			newValue, err := lib.ConvertValue(newRow.Data[column.Name], column.DataType, column.Length)
+			if err != nil {
+				return fmt.Errorf("cannot add row, %v %v", column.Name, err)
+			}
+			newRow.Data[column.Name] = newValue
 		}
-		newRow.Data[column.Name] = newValue
-
 		if column.PrimaryKey || column.Unique {
 			temp := make(map[string]string, 0)
 			temp[column.Name] = fmt.Sprintf("%v", columnValues[column.Name])
@@ -96,7 +106,11 @@ func (t *Table) AddRow(columnValues map[string]interface{}) error {
 			}
 		}
 		if !column.Nullable && columnValues[column.Name] == nil {
-			return errors.New("cannot add row, on-nullable column not provided: " + column.Name)
+			if column.Default == nil {
+				return errors.New("cannot add row, on-nullable column not provided: " + column.Name)
+			} else {
+				newRow.Data[column.Name] = column.Default
+			}
 		}
 
 		if column.ForeignKey {

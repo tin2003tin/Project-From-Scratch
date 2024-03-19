@@ -33,7 +33,7 @@ func (t *Table) UpdateRow(conditions []Condition, sets []Set) error {
 					}
 					if column.ForeignKey {
 						if !t.dataInForeignKeyExisted(&Row{Data: map[string]interface{}{set.ColumnName: set.Value}}, column.Name) {
-							return fmt.Errorf("cannot add row, %v not found in foreign key column '%s'", set.Value, column.Name)
+							return fmt.Errorf("cannot update row, %v not found in foreign key column '%s'", set.Value, column.Name)
 						}
 					}
 					if column.Name == set.ColumnName {

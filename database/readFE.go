@@ -26,6 +26,7 @@ func main() {
 	studentTable.AddRow(map[string]interface{}{"id": 507, "name": "Tony Stark", "email": "stark@example.com", "major_id": 303})
 	err = studentTable.AddRow(map[string]interface{}{"id": 508, "name": "Tin Siriwid", "email": "tin@example.com", "major_id": 304})
 	err = studentTable.AddRow(map[string]interface{}{"id": 509, "name": "Siri Thongon", "email": "siri@example.com", "major_id": 305})
+	err = studentTable.AddRow(map[string]interface{}{"id": 510, "name": "Test Ing", "email": "test@example.com", "major_id": 299})
 	if err != nil {
 		fmt.Println(err)
 	}

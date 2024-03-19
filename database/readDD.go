@@ -30,7 +30,7 @@ func main() {
 		{ColumnName: "id", Value: 100},
 		// {ColumnName: "name",Value: "test"},
 	}
-	err = database.Tables[0].Update(conditions, sets)
+	err = database.Tables[0].UpdateRow(conditions, sets)
 	if err != nil {
 		fmt.Println(err)
 		return

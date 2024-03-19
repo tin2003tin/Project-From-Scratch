@@ -86,7 +86,7 @@ func main() {
 	drinkTable.AddRow(map[string]interface{}{"id": 3, "name": "Tea", "market_id": 103, "price": 1.8})
 	drinkTable.AddRow(map[string]interface{}{"id": 4, "name": "Soda", "type": "Carbonated", "market_id": 103})
 	drinkTable.AddRow(map[string]interface{}{"id": 5, "name": "Beer", "type": "Alcoholic", "market_id": 101, "price": 3.5})
-	err = drinkTable.AddRow(map[string]interface{}{"id": 6, "name": "Wine", "type": "Alcoholic", "price": 5.0})
+	err = drinkTable.AddRow(map[string]interface{}{"name": "Wine", "type": "Alcoholic", "price": 5.0, "market_id": 101})
 	if (err != nil) {
 		fmt.Println(err)
 	}

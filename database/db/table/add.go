@@ -41,7 +41,6 @@ func (t *Table) AddColumn(name string, dataType string, length int, primaryKey b
 		Comment:    "",
 	}
 	if newColumn.Default != nil {
-		fmt.Println(newColumn.Default,newColumn.DataType)
 		newDefualt, err := lib.ConvertValue(newColumn.Default, newColumn.DataType, newColumn.Length)
 		if err != nil {
 			return fmt.Errorf("cannot add column, %v %v", newColumn.Name, err)
@@ -139,7 +138,7 @@ func (i *Index) AddRowToIndex(row Row) error {
 }
 
 func (t *Table) AddIndex(columnName string) error {
-	// Create the index object]
+	// Create the index object
 	if t.IndexTable == nil {
 		t.IndexTable = &Index{
 			Name:       "default_index",

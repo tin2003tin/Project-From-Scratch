@@ -17,8 +17,8 @@ func main() {
 	userTable := database.Tables[0]
 	userTable.PrintAsTable()
 	conditions := []table.Condition{
-		table.Condition{ColumnName: "age", Operator: ">=", Value: 50},
-		table.Condition{ColumnName: "gender", Operator: "=", Value: "female"},
+		table.Condition{ColumnName: "age", Operator: "<", Value: 50},
+		table.Condition{ColumnName: "gender", Operator: "!=", Value: "female"},
 		// query.Condition{ColumnName: "fullName", Operator: "=", Value: "Isabella Clark"},
 	}
 	fmt.Println("-----------------")

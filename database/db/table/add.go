@@ -1,20 +1,21 @@
 package table
 
 import (
+	"database/db/lib"
 	"errors"
 	"fmt"
 	"time"
 )
 
 func (t *Table) AddIdColumn() error {
-	err := t.AddColumn("id", "int", 0, 0, 0, true, true, false, nil, "", "")
+	err := t.AddColumn("id", "int", 0, true, false, false, nil)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (t *Table) AddColumn(name string, dataType string, length int, precision int, scale int, primaryKey bool, unique bool, nullable bool, defaultValue interface{}, check string, comment string) error {
+func (t *Table) AddColumn(name string, dataType string, length int, primaryKey bool, unique bool, nullable bool, defaultValue interface{}) error {
 	// Validate input parameters
 	if name == "" {
 		return errors.New("column name cannot be empty")
@@ -29,15 +30,15 @@ func (t *Table) AddColumn(name string, dataType string, length int, precision in
 		Name:       name,
 		DataType:   dataType,
 		Length:     length,
-		Precision:  precision,
-		Scale:      scale,
+		Precision:  0,
+		Scale:      0,
 		PrimaryKey: primaryKey,
 		ForeignKey: false,
 		Unique:     unique,
 		Nullable:   nullable,
 		Default:    defaultValue,
-		Check:      check,
-		Comment:    comment,
+		Check:      "",
+		Comment:    "",
 	}
 	// Add the new column to the table's metadata
 	t.Metadata.Columns = append(t.Metadata.Columns, newColumn)
@@ -65,6 +66,7 @@ func (t *Table) addPrimaryKey(name string) {
 
 func (t *Table) AddRow(columnValues map[string]interface{}) error {
 	// Check if the target table is nil
+
 	if t == nil {
 		return errors.New("target table is nil")
 	}
@@ -77,20 +79,32 @@ func (t *Table) AddRow(columnValues map[string]interface{}) error {
 	// Validate primary key and non-nullable columns
 	for _, column := range t.Metadata.Columns {
 		if column.PrimaryKey && columnValues[column.Name] == nil {
-			return errors.New("primary key column not provided: " + column.Name)
+			return errors.New("cannot add row, primary key column not provided: " + column.Name)
+		}
+		newValue, err := lib.ConvertValue(newRow.Data[column.Name], column.DataType, column.Length)
+		if err != nil {
+			return fmt.Errorf("cannot add row, %v %v", column.Name, err)
+		}
+		newRow.Data[column.Name] = newValue
+
+		if column.PrimaryKey || column.Unique {
+			temp := make(map[string]string, 0)
+			temp[column.Name] = fmt.Sprintf("%v", columnValues[column.Name])
+			_, found := t.IndexTable.Rows[fmt.Sprintf("%v", temp)]
+			if found {
+				return errors.New("cannot add row, primary key or unique already exists: " + column.Name + fmt.Sprintf(" %v", columnValues[column.Name]))
+			}
 		}
 		if !column.Nullable && columnValues[column.Name] == nil {
-			return errors.New("non-nullable column not provided: " + column.Name)
+			return errors.New("cannot add row, on-nullable column not provided: " + column.Name)
 		}
 
 		if column.ForeignKey {
 			if !t.dataInForeignKeyExisted(&newRow, column.Name) {
-				return fmt.Errorf("%v not found in foreign key column '%s'", newRow.Data[column.Name], column.Name)
+				return fmt.Errorf("cannot add row, %v not found in foreign key column '%s'", newRow.Data[column.Name], column.Name)
 			}
 		}
 	}
-
-	// Add the new row to the table's Rows slice
 	t.Metadata.Rows = append(t.Metadata.Rows, newRow)
 
 	// Update the index with the new values

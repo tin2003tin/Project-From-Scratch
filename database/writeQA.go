@@ -17,10 +17,10 @@ func main() {
 		return
 	}
 	userTable.AddIdColumn()
-	userTable.AddColumn("fullName", "string", 255, 0, 0, false, false, false, nil, "Full name of the student", "")
-	userTable.AddColumn("age", "int", 0, 0, 0, false, false, false, nil, "Age of the student", "")
-	userTable.AddColumn("gender", "string", 1, 0, 0, false, false, false, nil, "Gender of the student (M/F)", "")
-	userTable.AddColumn("email", "string", 255, 0, 0, false, true, false, nil, "Email address of the student", "")
+	userTable.AddColumn("fullName", "string", 255, false, false, false, nil)
+	userTable.AddColumn("age", "int", 0, false, false, false, nil)
+	userTable.AddColumn("gender", "string", 1, false, false, false, nil)
+	userTable.AddColumn("email", "string", 255, false, true, false, nil)
 
 	userTable.AddRow(map[string]interface{}{"id": 1, "fullName": "John Doe", "age": 16, "gender": "male", "email": "john@example.com"})
 	userTable.AddRow(map[string]interface{}{"id": 2, "fullName": "Jane Smith", "age": 18, "gender": "female", "email": "jane@example.com"})

@@ -9,8 +9,8 @@ type TableRegistry struct {
 
 // Table represents a database table
 type Table struct {
-	Metadata   TableMetadata     // Table metadata
-	IndexTable *Index // Indexes on the table
+	Metadata   TableMetadata // Table metadata
+	IndexTable *Index        // Indexes on the table
 }
 
 // TableMetadata represents metadata about a table
@@ -54,12 +54,13 @@ type Row struct {
 
 // ForeignKey represents a foreign key constraint
 type ForeignKey struct {
-	Name       string // Constraint name
+	Name          string // Constraint name
 	ColumnName    string // Columns in the current table
-	RefTable   *Table // Referenced table
+	RefTableName  string // Reference table name
+	RefTable      *Table // Referenced table
 	RefColumnName string // Referenced columns in the referenced table
-	OnUpdate   string // Action to perform on update (e.g., CASCADE, SET NULL)
-	OnDelete   string // Action to perform on delete (e.g., CASCADE, SET NULL)
+	OnUpdate      string // Action to perform on update (e.g., CASCADE, SET NULL)
+	OnDelete      string // Action to perform on delete (e.g., CASCADE, SET NULL)
 }
 
 // Index represents an index on a table

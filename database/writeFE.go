@@ -19,8 +19,8 @@ func main() {
 		return
 	}
 	majorTable.AddIdColumn()
-	majorTable.AddColumn("name", "string", 0, 0, 0, false, false, false, nil, "", "")
-	majorTable.AddColumn("head", "string", 0, 0, 0, false, true, false, nil, "", "")
+	majorTable.AddColumn("name", "string", 0, false, false, false, nil)
+	majorTable.AddColumn("head", "string", 0, false, true, false, nil)
 	majorColumnNames := []string{"id", "name", "head"}
 
 	majorSampleData := [][]interface{}{
@@ -52,9 +52,9 @@ func main() {
 		return
 	}
 	studentTable.AddIdColumn()
-	studentTable.AddColumn("name", "string", 0, 0, 0, false, false, false, nil, "", "")
-	studentTable.AddColumn("email", "string", 0, 0, 0, false, true, false, nil, "", "")
-	studentTable.AddColumn("major_id", "int", 0, 0, 0, true, false, false, nil, "", "")
+	studentTable.AddColumn("name", "string", 0, false, false, false, nil)
+	studentTable.AddColumn("email", "string", 0,false, true, false, nil)
+	studentTable.AddColumn("major_id", "int", 0,  false, false, false, nil)
 	err = studentTable.CreateForeignKey("student_major_foreignKey", "major_id", database.Registry.Tables["major"], "id")
 	if err != nil {
 		fmt.Println(err)

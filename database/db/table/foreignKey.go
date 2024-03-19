@@ -30,7 +30,6 @@ func (t *Table) CreateForeignKey(name string, columnName string, refTable *Table
 	if !refTable.hasColumn(refColumnName) {
 		return errors.New("referenced column does not exist in the target table OR specified column is not unique or primaryKey")
 	}
-	t.IndexTable.Columns[columnName].ForeignKey = true
 	var index int
 	for i, col := range t.Metadata.Columns {
 		if col.Name == columnName {
@@ -44,14 +43,17 @@ func (t *Table) CreateForeignKey(name string, columnName string, refTable *Table
 		ColumnName:    columnName,
 		RefTable:      refTable,
 		RefColumnName: refColumnName,
+		RefTableName:  refTable.Metadata.Name,
 	})
 	t.updateMetadataFile()
 	return nil
 }
 
 func (t *Table) hasColumn(columnName string) bool {
-	if _, ok := t.IndexTable.Columns[columnName]; ok {
-		return true
+	for _, col := range t.Metadata.Columns {
+		if col.Name == columnName {
+			return true
+		}
 	}
 	return false
 }

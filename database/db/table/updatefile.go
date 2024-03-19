@@ -20,9 +20,19 @@ func (t *Table) updateMetadataFile() error {
 	// Initialize an encoder for writing binary data
 	encoder := gob.NewEncoder(metaFile)
 
+	refTables := make([]*Table, len(t.Metadata.ForeignKeys))
+	for i := range t.Metadata.ForeignKeys {
+		refTables[i] = t.Metadata.ForeignKeys[i].RefTable
+		t.Metadata.ForeignKeys[i].RefTable = nil
+	}
+
 	// Encode and write the updated database metadata to the file
 	if err := encoder.Encode(t.Metadata); err != nil {
 		return fmt.Errorf("failed to encode table's metadata: %v", err)
+	}
+
+	for i := range t.Metadata.ForeignKeys {
+		t.Metadata.ForeignKeys[i].RefTable = refTables[i]
 	}
 
 	fmt.Println("Table metadata file updated successfully")

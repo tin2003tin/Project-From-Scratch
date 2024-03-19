@@ -52,6 +52,8 @@ func CompareString(value string, operator string, target interface{}) bool {
 	switch operator {
 	case "=":
 		return value == targetValue
+	case "!=":
+		return value != targetValue
 	default:
 		return false
 	}

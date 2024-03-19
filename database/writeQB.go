@@ -33,10 +33,10 @@ func main() {
 
 	// Add columns to the employee table
 	employeeTable.AddIdColumn()
-	employeeTable.AddColumn("name", "string", 0, 0, 0, false, false, false, nil, "", "")
-	employeeTable.AddColumn("department", "string", 0, 0, 0, false, false, false, nil, "", "")
-	employeeTable.AddColumn("salary", "int", 0, 0, 0, false, false, false, nil, "", "")
-	employeeTable.AddColumn("age", "int", 0, 0, 0, false, false, false, nil, "", "")
+	employeeTable.AddColumn("name", "string", 0, false, false, false, nil)
+	employeeTable.AddColumn("department", "string", 0, false, false, false, nil)
+	employeeTable.AddColumn("salary", "int", 0, false, false, false, nil)
+	employeeTable.AddColumn("age", "int", 0, false, false, false, nil)
 
 	// Add rows to the employee table
 	employeeTable.AddRow(map[string]interface{}{"id": 1, "name": "John Doe", "department": "IT", "salary": 5000, "age": 30})

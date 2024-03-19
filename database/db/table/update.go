@@ -1,6 +1,8 @@
 package table
 
 import (
+	"database/db/lib"
+	"errors"
 	"fmt"
 )
 
@@ -9,16 +11,40 @@ type Set struct {
 	Value      interface{}
 }
 
-func (t *Table) Update(conditions []Condition, sets []Set) error {
+func (t *Table) UpdateRow(conditions []Condition, sets []Set) error {
 	if t == nil {
 		return fmt.Errorf("table is nil")
 	}
 
 	// Iterate over each row in the table
+
 	for i := len(t.Metadata.Rows) - 1; i >= 0; i-- {
 		row := t.Metadata.Rows[i]
 		if checkAllConditions(row, conditions) {
 			for _, set := range sets {
+				for _, column := range t.Metadata.Columns {
+					if column.PrimaryKey || column.Unique {
+						temp := make(map[string]string, 0)
+						temp[set.ColumnName] = fmt.Sprintf("%v", set.Value)
+						_, found := t.IndexTable.Rows[fmt.Sprintf("%v", temp)]
+						if found {
+							return errors.New("cannot update row, primary key or unique already exists: " + set.ColumnName + fmt.Sprintf(" %v", set.Value))
+						}
+					}
+					if column.ForeignKey {
+						if !t.dataInForeignKeyExisted(&Row{Data: map[string]interface{}{set.ColumnName: set.Value}}, column.Name) {
+							return fmt.Errorf("cannot add row, %v not found in foreign key column '%s'", set.Value, column.Name)
+						}
+					}
+					if column.Name == set.ColumnName {
+						newValue, err := lib.ConvertValue(set.Value, column.DataType, column.Length)
+						if err != nil {
+							return fmt.Errorf("cannot update, %v %v", column.Name, err)
+						}
+						set.Value = newValue
+					}
+				}
+
 				if err := updateFromIndex(t, &row, set); err != nil {
 					return err
 				}

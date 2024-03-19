@@ -34,17 +34,45 @@ func PrintAsTable(columns []Column, rows []Row) {
 	// Print rows
 	for _, row := range rows {
 		dataRow := "|"
-		for i, col := range columns {
-			dataRow += fmt.Sprintf(" %-*v |", colWidths[i], row.Data[col.Name])
+		for _, col := range columns {
+			value := fmt.Sprintf("%v", row.Data[col.Name])
+			formattedValue := fmt.Sprintf(" %-*v ", colWidths[colIndex(col, columns)], value)
+			dataRow += formattedValue + "|"
 		}
 		fmt.Println(dataRow)
 	}
-
-	// Print bottom separator line
 	fmt.Println(separator)
 }
 
-func (t *Table) PrintAsTable(){
-	fmt.Println("Table :",t.Metadata.Name)
-	PrintAsTable(t.Metadata.Columns,t.Metadata.Rows)
+// colIndex returns the index of the column in the columns slice
+func colIndex(col Column, columns []Column) int {
+	for i, c := range columns {
+		if c.Name == col.Name {
+			return i
+		}
+	}
+	return -1 // Column not found
+}
+
+func (t *Table) PrintAsTable() {
+	fmt.Println("Table :", t.Metadata.Name)
+	PrintAsTable(t.Metadata.Columns, t.Metadata.Rows)
+}
+
+func (t *Table) ListColumn() []string {
+	columns := make([]string, 0)
+	for _, column := range t.Metadata.Columns {
+		text := column.Name + ":" + column.DataType
+		columns = append(columns, text)
+	}
+	return columns
+}
+
+func ListColumn(t *Table) []string {
+	columns := make([]string, 0)
+	for _, column := range t.Metadata.Columns {
+		text := column.Name + ":" + column.DataType
+		columns = append(columns, text)
+	}
+	return columns
 }

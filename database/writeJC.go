@@ -22,9 +22,9 @@ func main() {
 		return
 	}
 	employeeTable.AddIdColumn()
-	employeeTable.AddColumn("name", "string", 0, 0, 0, false, false, false, nil, "", "")
-	employeeTable.AddColumn("email", "string", 0, 0, 0, false, true, false, nil, "", "")
-	employeeTable.AddColumn("department", "string", 0, 0, 0, false, false, false, nil, "", "")
+	employeeTable.AddColumn("name", "string", 0, false, false, false, nil)
+	employeeTable.AddColumn("email", "string", 0,false, true, false, nil)
+	employeeTable.AddColumn("department", "string", 0, false, false, false, nil)
 	columnNames := []string{"id", "name", "email", "department"}
 
 	sampleData := [][]interface{}{
@@ -62,8 +62,8 @@ func main() {
 		return
 	}
 	salaryTable.AddIdColumn()
-	salaryTable.AddColumn("employee_id", "string", 0, 0, 0, true, false, false, nil, "", "")
-	salaryTable.AddColumn("salary", "int", 0, 0, 0, false, false, false, nil, "", "")
+	salaryTable.AddColumn("employee_id", "string", 0, true, false, false, nil)
+	salaryTable.AddColumn("salary", "int", 0,false, false, false, nil)
 	salaryColumnNames := []string{"id", "employee_id", "salary"}
 	salarySampleData := [][]interface{}{
 		{1, 201, 65000},

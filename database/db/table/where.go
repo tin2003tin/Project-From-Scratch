@@ -13,7 +13,7 @@ type Condition struct {
 }
 
 // QueryRows returns rows from the table that match the specified conditions
-func (t *Table) QueryRows(conditions []Condition) ([]Row, error) {
+func (t *Table) Where(conditions []Condition) ([]Row, error) {
 	var matchedRows []Row
 
 	// Iterate through each row in the table

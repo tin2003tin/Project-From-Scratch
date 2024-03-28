@@ -26,7 +26,7 @@ func main() {
 
 	// Measure the execution time for QueryRows
 	startQueryRows := time.Now()
-	found, err := employeeTable.QueryRows(conditions)
+	found, err := employeeTable.Where(conditions)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -35,7 +35,7 @@ func main() {
 	fmt.Println(found[0])
 	// Measure the execution time for QueryRowByIndex
 	startQueryRowByIndex := time.Now()
-	ifound, err := employeeTable.QueryRowByIndex("id", id) // Query using the index for the last row
+	ifound, err := employeeTable.WhereRowByIndex("id", id) // Query using the index for the last row
 	if err != nil {
 		fmt.Println(err)
 		return

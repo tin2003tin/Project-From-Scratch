@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func (t *Table) QueryRowByIndex(columnName string, target interface{}) (*Row, error) {
+func (t *Table) WhereRowByIndex(columnName string, target interface{}) (*Row, error) {
 	if columnName == "" {
 		return nil, errors.New("index is empty")
 	}

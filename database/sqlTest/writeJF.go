@@ -18,7 +18,7 @@ func main() {
 		return
 	}
 
-	marketTable.AddColumn("id", "int", 0, true, true, false, nil)
+	marketTable.AddIdColumn()
 	marketTable.AddColumn("name", "string", 100, false, false, false, "")
 	marketTable.AddColumn("location", "string", 255, false, false, true, "")
 
@@ -27,17 +27,15 @@ func main() {
 	marketTable.AddRow(map[string]interface{}{"id": 103, "name": "Market C", "location": "City C"})
 
 	marketTable.SerializeRows()
-
 	drinkTable, err := database.CreateTable("drink")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
-	drinkTable.AddColumn("id", "int", 0, true, true, false, nil)
+	drinkTable.AddIdColumn()
 	drinkTable.AddColumn("name", "string", 100, false, false, false, "")
 	drinkTable.AddColumn("type", "string", 50, false, false, true, "")
-	drinkTable.AddColumn("market_id", "int", 50, false, false, false, "")
+	drinkTable.AddColumn("market_id", "int", 50, false, false, false, 0)
 	drinkTable.AddColumn("price", "float", 0, false, false, false, nil)
 	err = drinkTable.CreateForeignKey("market_drink", "market_id", marketTable, "id")
 	if err != nil {
@@ -64,16 +62,18 @@ func main() {
 		return
 	}
 
-	foodTable.AddColumn("id", "int", 0, true, true, false, nil)
+	foodTable.AddIdColumn()
 	foodTable.AddColumn("name", "string", 100, false, false, false, "")
 	foodTable.AddColumn("category", "string", 50, false, false, true, "")
-	foodTable.AddColumn("market_id", "int", 50, false, false, false, "")
+	foodTable.AddColumn("market_id", "int", 50, false, false, false, 0)
 	foodTable.AddColumn("price", "float", 0, false, false, false, nil)
+
 	err = foodTable.CreateForeignKey("market_drink", "market_id", marketTable, "id")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
 	err = foodTable.AddRow(map[string]interface{}{"id": 1, "name": "Banana", "category": "Fruit", "market_id": 102, "price": 1.99})
 	if err != nil {
 		fmt.Println(err)

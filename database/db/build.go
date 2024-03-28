@@ -86,12 +86,11 @@ func (db *Database) readTable(metaFilePath string) error {
 			newTable.IndexTable = indexTable
 		}
 
-		if err := db.buildForeignKey(newTable); err != nil {
-			return err
-		}
-
 		db.Tables = append(db.Tables, newTable)
 		db.Registry.Tables[tableMeta.Name] = newTable
+	}
+	if err := db.buildForeignKey(db.Tables); err != nil {
+		return err
 	}
 
 	return nil
@@ -168,9 +167,12 @@ func (db *Database) buildIndex() error {
 	return nil
 }
 
-func (db *Database) buildForeignKey(t *table.Table) error {
-	for i := range t.Metadata.ForeignKeys {
-		t.Metadata.ForeignKeys[i].RefTable = db.Registry.Tables[t.Metadata.ForeignKeys[i].RefTableName]
+func (db *Database) buildForeignKey(tables []*table.Table) error {
+	for _, t := range tables {
+		for i := range t.Metadata.ForeignKeys {
+			t.Metadata.ForeignKeys[i].RefTable = db.Registry.Tables[t.Metadata.ForeignKeys[i].RefTableName]
+		}
 	}
+
 	return nil
 }

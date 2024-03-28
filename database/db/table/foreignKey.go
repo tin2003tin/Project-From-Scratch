@@ -6,6 +6,7 @@ import (
 )
 
 func (t *Table) dataInForeignKeyExisted(row *Row, columnName string) bool {
+
 	for _, foreignKey := range t.Metadata.ForeignKeys {
 		if foreignKey.ColumnName == columnName {
 			refTable := foreignKey.RefTable.IndexTable

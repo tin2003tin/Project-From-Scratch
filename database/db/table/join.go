@@ -21,13 +21,10 @@ type On struct {
 }
 
 // Join performs a join operation between the current table and another table
-func (t *Table) Join(another *Table, joinType JoinType, conditions []On) (*Table, error) {
+func (t *Table) Join(another *Table, joinType JoinType, on On) (*Table, error) {
 	// Validate input parameters
 	if another == nil {
 		return nil, fmt.Errorf("another table is nil")
-	}
-	if len(conditions) == 0 {
-		return nil, fmt.Errorf("no join conditions provided")
 	}
 
 	// Check if both tables have data
@@ -36,7 +33,7 @@ func (t *Table) Join(another *Table, joinType JoinType, conditions []On) (*Table
 	}
 	switch joinType {
 	case InnerJoin:
-		joinedData, err := t.performInnerJoin(another, conditions)
+		joinedData, err := t.performInnerJoin(another, on)
 		if err != nil {
 			return nil, err
 		}
@@ -58,8 +55,8 @@ func (t *Table) Join(another *Table, joinType JoinType, conditions []On) (*Table
 	return nil, fmt.Errorf("join operation failed")
 }
 
-func (t *Table) performInnerJoin(another *Table, conditions []On) (*Table, error) {
-	joinedRows := make([]Row, 0)
+func (t *Table) performInnerJoin(another *Table, on On) (*Table, error) {
+	var joinedRows *[]Row
 	joinedColumns := make([]Column, 0)
 	addedColumns := make(map[string]bool)
 	for _, col := range t.Metadata.Columns {
@@ -83,20 +80,31 @@ func (t *Table) performInnerJoin(another *Table, conditions []On) (*Table, error
 		addedColumns[col.Name] = true
 	}
 
+	if _, ok := another.IndexTable.Columns[on.Another]; ok {
+		joinedRows, _ = t.JoinAll(another, on)
+	} else {
+		joinedRows, _ = t.JoinWithIndex(another, on)
+
+	}
+
+	// Create and return a new Table instance with joinedRows and joinedColumns
+	return &Table{Metadata: TableMetadata{Rows: *joinedRows, Columns: joinedColumns}}, nil
+}
+
+func (t *Table) JoinAll(another *Table, on On) (*[]Row, error) {
+	joinedRows := make([]Row, 0)
 	for _, row := range t.Metadata.Rows {
 		// Iterate over rows in another.Metadata.Rows
 		for _, anotherRow := range another.Metadata.Rows {
-			if t.checkAllConditions(row, anotherRow, conditions) {
+			if t.checkOnCondition(row, anotherRow, on) {
 				addedRows := make(map[string]bool)
 				joinedRow := Row{
 					Data: make(map[string]interface{}),
 				}
-
 				// Copy data from row to joinedRow
 				for key, value := range row.Data {
 					joinedRow.Data[key] = value
 					addedRows[key] = true
-
 				}
 
 				// Add data from anotherRow to joinedRow, handling column name conflicts
@@ -117,26 +125,51 @@ func (t *Table) performInnerJoin(another *Table, conditions []On) (*Table, error
 			}
 		}
 	}
-
-	// Create and return a new Table instance with joinedRows and joinedColumns
-	return &Table{Metadata: TableMetadata{Rows: joinedRows, Columns: joinedColumns}}, nil
+	return &joinedRows, nil
 }
 
-func (t *Table) checkAllConditions(row1, row2 Row, conditions []On) bool {
-	for _, condition := range conditions {
-		if !t.checkSingleCondition(row1, row2, condition) {
-			return false
+func (t *Table) JoinWithIndex(another *Table, on On) (*[]Row, error) {
+	joinedRows := make([]Row, 0)
+	anotherRow := another.IndexTable.Rows[on.Another]
+	for _, row := range t.Metadata.Rows {
+		if t.checkOnCondition(row, *anotherRow, on) {
+			addedRows := make(map[string]bool)
+			joinedRow := Row{
+				Data: make(map[string]interface{}),
+			}
+			// Copy data from row to joinedRow
+			for key, value := range row.Data {
+				joinedRow.Data[key] = value
+				addedRows[key] = true
+			}
+
+			// Add data from anotherRow to joinedRow, handling column name conflicts
+			for key, value := range anotherRow.Data {
+				newKey := key
+				count := 1
+				// Keep incrementing the count until we find a unique key
+				for addedRows[newKey] {
+					count++
+					newKey = fmt.Sprintf("%s_%d", key, count)
+				}
+				addedRows[newKey] = true
+				joinedRow.Data[newKey] = value
+			}
+
+			// Add joinedRow to joinedRows
+			joinedRows = append(joinedRows, joinedRow)
 		}
+
 	}
-	return true
+	return &joinedRows, nil
 }
 
-func (t *Table) checkSingleCondition(row1, row2 Row, condition On) bool {
-	switch condition.Operator {
+func (t *Table) checkOnCondition(row1, row2 Row, on On) bool {
+	switch on.Operator {
 	case "=":
-		return row1.Data[condition.Self] == row2.Data[condition.Another]
+		return row1.Data[on.Self] == row2.Data[on.Another]
 	case "!=":
-		return row1.Data[condition.Self] != row2.Data[condition.Another]
+		return row1.Data[on.Self] != row2.Data[on.Another]
 	}
 	return false
 }

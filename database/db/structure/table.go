@@ -1,4 +1,4 @@
-package table
+package structure
 
 import "time"
 
@@ -10,14 +10,14 @@ type TableRegistry struct {
 // Table represents a database table
 type Table struct {
 	Metadata   TableMetadata // Table metadata
-	IndexTable *Index        // Indexes on the table
+	Columns    []Column
+	Rows       []Row
+	IndexTable *Index // Indexes on the table
 }
 
 // TableMetadata represents metadata about a table
 type TableMetadata struct {
 	Name         string       // Table name
-	Columns      []Column     // List of columns
-	Rows         []Row        // List of rows in the table
 	PrimaryKeys  []string     // List of primary key column names
 	ForeignKeys  []ForeignKey // List of foreign key constraints
 	Check        string       // Table-level check constraint expression
@@ -31,6 +31,7 @@ type TableMetadata struct {
 
 // Column represents a column in a table
 type Column struct {
+	Index      int
 	Name       string      // Column name
 	DataType   string      // Data type (e.g., int, string)
 	Length     int         // Length of the column (for variable-length types)
@@ -47,9 +48,9 @@ type Column struct {
 
 // Row represents a row of data in a table
 type Row struct {
-	Data      map[string]interface{} // Map to store column name-value pairs
-	CreatedAt time.Time              // Timestamp of row creation
-	UpdatedAt time.Time              // Timestamp of last update
+	Data      []interface{} // Map to store column name-value pairs
+	CreatedAt time.Time     // Timestamp of row creation
+	UpdatedAt time.Time     // Timestamp of last update
 }
 
 // ForeignKey represents a foreign key constraint
@@ -81,7 +82,7 @@ type Index struct {
 type IndexType int
 
 const (
-	BTreeIndex IndexType = iota
-	HashIndex
-	GINIndex
+	HashIndex IndexType = iota
+	// BTreeIndex
+	// GINIndex
 )

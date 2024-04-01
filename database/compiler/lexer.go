@@ -14,14 +14,14 @@ type Lexer struct {
 	Terminals []string
 }
 
-func NewLexer(terminals []string) *Lexer {
+func (c *Compiler) NewLexer() *Lexer {
 	l := Lexer{
-		Terminals: terminals,
+		Terminals: c.LRTable.Grammar.Terminals,
 	}
 	return &l
 }
 
-func (l *Lexer) Convert(input string) []Token {
+func (l *Lexer) Convert(input string) ([]Token, error) {
 	tokens := make([]Token, 0)
 	var currentToken strings.Builder
 	var ones []rune
@@ -35,8 +35,17 @@ func (l *Lexer) Convert(input string) []Token {
 	for _, char := range input {
 		if unicode.IsSpace(char) {
 			if currentToken.Len() > 0 {
-				tokens = append(tokens, l.getTokenType(currentToken.String()))
-				currentToken.Reset()
+				if startsWithSingleQuote(currentToken.String()) {
+					if endsWithSingleQuote(currentToken.String()) {
+						tokens = append(tokens, l.getTokenType(currentToken.String()))
+						currentToken.Reset()
+					} else {
+						currentToken.WriteRune(char)
+					}
+				} else {
+					tokens = append(tokens, l.getTokenType(currentToken.String()))
+					currentToken.Reset()
+				}
 			}
 		} else if containsRune(ones, char) {
 			if currentToken.Len() > 0 {
@@ -53,7 +62,7 @@ func (l *Lexer) Convert(input string) []Token {
 		tokens = append(tokens, l.getTokenType(currentToken.String()))
 	}
 
-	return tokens
+	return tokens, nil
 }
 
 func (l *Lexer) getTokenType(tokenValue string) Token {
@@ -72,4 +81,12 @@ func containsRune(runes []rune, r rune) bool {
 		}
 	}
 	return false
+}
+
+func endsWithSingleQuote(s string) bool {
+	return len(s) > 0 && s[len(s)-1] == '\''
+}
+
+func startsWithSingleQuote(s string) bool {
+	return len(s) > 0 && s[0] == '\''
 }

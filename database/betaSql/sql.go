@@ -2,43 +2,48 @@ package betasql
 
 import (
 	"database/compiler"
-	"database/db"
+	"database/db/structure"
+	"fmt"
 )
 
-type Sql struct {
-	Compiler       compiler.Compiler
-	LoadedDatabase []db.Database
+type SqlCompliler struct {
+	Compiler compiler.Compiler
 }
 
-func NewSql() *Sql {
-	sql := Sql{
-		Compiler: *compiler.InitCompiler(SQL_GRAMMER),
-	}
-	return &sql
+func InitSqlCompiler() SqlCompliler {
+	com := compiler.InitCompiler(SQL_GRAMMER)
+	sql := SqlCompliler{Compiler: *com}
+	return sql
 }
 
-func (sql *Sql) LoadDatabase(databae string) (*db.Database, error) {
-	database, err := db.GetDataBase(databae)
+type SelectDatabase struct {
+	DataBase *structure.Database
+	Output   *[]byte
+}
+
+func (sq *SqlCompliler) Prase(database *structure.Database, sqltext string) ([]byte, error) {
+	lexer := sq.Compiler.NewLexer()
+	tokens, err := lexer.Convert(sqltext)
+	fmt.Println(tokens)
 	if err != nil {
 		return nil, err
 	}
-	sql.LoadedDatabase = append(sql.LoadedDatabase, *database)
-	return database, nil
-}
-
-func (sql *Sql) GetDataBase(name string) (*db.Database, error) {
-	for _, database := range sql.LoadedDatabase {
-		if database.Name == name {
-			return &database, nil
-		}
-	}
-	database, err := sql.LoadDatabase(name)
+	selectDb := SelectDatabase{DataBase: database}
+	handlers := compiler.SetOfFunc{Handlers: []func([][]string) ([][]string, error){
+		selectDb.loadColumn,
+		selectDb.loadSql,
+		selectDb.addColumn,
+		selectDb.loadTable,
+		selectDb.loadOp,
+		selectDb.loadType,
+		selectDb.loadCondition,
+		selectDb.condition,
+		selectDb.loadJoin,
+	}}
+	parser := sq.Compiler.NewParser(handlers)
+	err = parser.Parse(tokens)
 	if err != nil {
 		return nil, err
 	}
-	return database, nil
-}
-
-func (sql *Sql) ReadSql(input string) {
-
+	return *selectDb.Output, nil
 }

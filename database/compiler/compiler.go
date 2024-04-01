@@ -4,8 +4,6 @@ import "strings"
 
 type Compiler struct {
 	LRTable  *LRTable
-	Handlers SetOfFunc
-	LRParser *LRParser
 }
 
 func InitCompiler(grammer string) *Compiler {

@@ -1,7 +1,7 @@
 package betasql
 
 const SQL_GRAMMER string = `
-		S' -> S                         ## handle1 
+		S' -> S                        
 		S -> Select C From T J W        ## loadSql
 		J -> Join ID On ID Op ID		## loadJoin
 		J -> ''                         
@@ -13,4 +13,4 @@ const SQL_GRAMMER string = `
 		C -> ID 						## loadColumn
 		T -> ID 						## loadTable
 		Op -> ID 						## loadOp
-`
+							`

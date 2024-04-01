@@ -1,46 +1,34 @@
 package db
 
 import (
-	table "database/db/table"
+	db_constant "database/db/constant"
+	filemanager "database/db/storageManager/fileManager"
+	"database/db/structure"
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 )
 
-type Database struct {
-	Name         string               // Database name
-	Tables       []*table.Table       // Slice of tables
-	Registry     *table.TableRegistry // TableRegistry for managing tables by name
-	MetadataPath string               // Path to the metadata file
-}
-
-func CreateDatabase(name string) (*Database, error) {
+func CreateDatabase(name string, username string, password string) (*structure.Database, error) {
 	// Create the database instance
-	db := &Database{
+	db := &structure.Database{
 		Name:         name,
-		Tables:       make([]*table.Table, 0),
-		Registry:     &table.TableRegistry{Tables: make(map[string]*table.Table)},
-		MetadataPath: "./collection/" + name,
+		Tables:       make([]*structure.Table, 0),
+		Registry:     &structure.TableRegistry{Tables: make(map[string]*structure.Table)},
+		MetadataPath: db_constant.DATABASE_PATH + name,
+		TableNames:   []string{},
+		Username:     username,
+		Password:     password,
 	}
 
-	// Create a folder for the database
-	dbFolderPath := filepath.Join("./collection/", name)
-	if err := os.Mkdir(dbFolderPath, 0755); err != nil {
-		return nil, fmt.Errorf("failed to create database folder: %v", err)
-	}
-
-	// Create and write metadata to the metadata file
-	metaFilePath := filepath.Join(dbFolderPath, fmt.Sprintf("%s.meta", name))
-	if err := createMetadataFile(db, metaFilePath); err != nil {
-		return nil, fmt.Errorf("failed to create metadata file: %v", err)
+	// Create the data file
+	if err := filemanager.CreateDatabaseCollection(db); err != nil {
+		return nil, err
 	}
 
 	return db, nil
 }
 
-func (db *Database) CreateTable(name string) (*table.Table, error) {
-	// Validate input parameters
+func CreateTable(db *structure.Database, name string) (*structure.Table, error) {
 	if name == "" {
 		return nil, errors.New("table name cannot be empty")
 	}
@@ -50,31 +38,35 @@ func (db *Database) CreateTable(name string) (*table.Table, error) {
 	}
 
 	// Create default metadata
-	metadata := table.TableMetadata{
+	metadata := structure.TableMetadata{
 		Name:         name,
-		Rows:         make([]table.Row, 0),
 		MetadataPath: db.MetadataPath,
 	}
 	// Create and return the Table instance
-	newTable := &table.Table{
+	newTable := &structure.Table{
 		Metadata:   metadata,
 		IndexTable: nil,
 	}
 	// Add the new table to the database
 	db.Tables = append(db.Tables, newTable)
+
 	// Register the new table in the TableRegistry
 	db.Registry.Tables[name] = newTable
 
-	// Update the metadata file
-	tableMetaFilePath := filepath.Join(db.MetadataPath, fmt.Sprintf("%s.ttm", name))
-	if err := createTableMetadataFile(newTable, tableMetaFilePath); err != nil {
+	db.TableNames = append(db.TableNames, newTable.Metadata.Name)
+
+	// Create the metadata file
+	if err := filemanager.CreateTableFile(newTable); err != nil {
 		return nil, fmt.Errorf("failed to create table metadata file: %v", err)
+	}
+	if err := filemanager.UpdateDatabaseMetadataFile(db); err != nil {
+		return nil, err
 	}
 
 	return newTable, nil
 }
 
-func (db *Database) GetTable(name string) (*table.Table, error) {
+func GetTable(db *structure.Database, name string) (*structure.Table, error) {
 	tbl, ok := db.Registry.Tables[name]
 	if !ok {
 		return nil, fmt.Errorf("table '%s' not found in the database", name)

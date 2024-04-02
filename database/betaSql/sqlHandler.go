@@ -86,3 +86,8 @@ func (sdb *SelectDatabase) loadJoin(item [][]string) ([][]string, error) {
 	return [][]string{join}, nil
 
 }
+
+func (sdb *SelectDatabase) loadEqual(item [][]string) ([][]string, error) {
+	fmt.Println("lll",item)
+	return item ,nil
+}

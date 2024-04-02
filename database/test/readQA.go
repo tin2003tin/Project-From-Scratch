@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"database/db/queryProcessor"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func main() {
+func main2() {
 	database, err := buffermanager.LoadDatabaseMetadata("A_user")
 	if err != nil {
 		fmt.Println(err)

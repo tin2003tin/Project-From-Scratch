@@ -44,6 +44,11 @@ func (sq *SqlCompliler) Prase(database *structure.Database, sqltext string) ([]b
 		selectDb.addValue,
 		selectDb.loadColumns,
 		selectDb.deleteRow,
+		selectDb.loadEqual,
+		selectDb.updateRow,
+		selectDb.loadSet,
+		selectDb.loadSets,
+		selectDb.addSet,
 	}}
 	parser := sq.Compiler.NewParser(handlers)
 	err = parser.Parse(tokens)

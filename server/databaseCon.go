@@ -20,14 +20,17 @@ func main() {
 		return
 	}
 
-	message1 := `Delete From user
-				Where id = 37
+	message1 := `Select * From user
+				Where id > 34
 				$`
-	message2 := `Insert Into user
-				 Value ( 37,'Job',20,'male','job@gmail.com' )
+
+	message2 := `Update user 
+				Set fullName = 'nut', age = 100
+				Where id > 34
 				$`
-	message3 := `Select fullName From user
-				Where age < 50
+
+	message3 := `Select * From user
+
 				$`
 
 	fmt.Println("====")

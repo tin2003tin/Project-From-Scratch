@@ -23,6 +23,11 @@ func (q *QueryManager) UpdateRow(conditions []structure.Condition, sets []Set) e
 		mappingColumn[column.Name] = i
 
 	}
+	for _, set := range sets {
+		if !(q.hasColumnC(set.ColumnName)) {
+			return errors.New(set.ColumnName + " is not found")
+		}
+	}
 	for i := len(q.Table.Rows) - 1; i >= 0; i-- {
 		row := q.Table.Rows[i]
 		for _, cond := range conditions {

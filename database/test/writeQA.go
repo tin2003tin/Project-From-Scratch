@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"database/db"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func main() {
+func main4() {
 	database, err := db.CreateDatabase("A_user","tin","1234")
 	if err != nil {
 		fmt.Println(err)

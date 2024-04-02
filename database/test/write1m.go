@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"database/db"
@@ -10,7 +10,7 @@ import (
 //	Write 100k employee
 //
 
-func main() {
+func main3() {
 	// Create a new database named "Company"
 	database, err := db.CreateDatabase("1m", "tin", "1234")
 	if err != nil {

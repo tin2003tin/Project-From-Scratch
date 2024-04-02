@@ -64,9 +64,7 @@ func (app *App) handleClient(conn net.Conn) {
 		start := time.Now()
 		json, err := app.SqlCompliler.Prase(db, message)
 		if err != nil {
-			fmt.Println("Testsetstetst")
 			errJson := handleError(err)
-			fmt.Println(string(errJson))
 			conn.Write(errJson)
 		} else {
 			conn.Write(json)

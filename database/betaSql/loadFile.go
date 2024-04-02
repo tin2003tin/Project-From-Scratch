@@ -1,7 +1,6 @@
 package betasql
 
 import (
-	"database/db/queryProcessor"
 	buffermanager "database/db/storageManager/bufferManager"
 	"database/db/structure"
 	"sync"
@@ -64,7 +63,6 @@ func (sdb *SelectDatabase) loadFile(tableName string) (*structure.Table, error) 
 	if err != nil {
 		return nil, err
 	}
-	queryProcessor.NewQueryManager(table)
 
 	return table, nil
 }

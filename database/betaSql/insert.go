@@ -31,7 +31,7 @@ func (sdb *SelectDatabase) loadInsert(item [][]string) ([][]string, error) {
 		return nil, err
 	}
 
-	queryTable1 := queryProcessor.NewQueryManager(tables[0])
+	queryTable := queryProcessor.NewQueryManager(tables[0])
 
 	var row []interface{}
 	for _, val := range _values {
@@ -51,17 +51,17 @@ func (sdb *SelectDatabase) loadInsert(item [][]string) ([][]string, error) {
 		row[i], row[j] = row[j], row[i]
 	}
 
-	err = queryTable1.AddRow(row)
+	err = queryTable.AddRow(row)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
 
-	queryTable1.Commit()
-	queryTable1.ResetCurrent()
+	queryTable.Commit()
+	queryTable.ResetCurrent()
 
 	var addedRow map[string]interface{} = map[string]interface{}{}
-	for i, col := range queryTable1.CurrentColumns {
+	for i, col := range queryTable.CurrentColumns {
 			addedRow[col.Name] = row[i]
 	}
 	json, err := lib.ConvertToJson(addedRow)

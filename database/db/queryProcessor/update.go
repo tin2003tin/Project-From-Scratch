@@ -97,21 +97,21 @@ func updateFromIndex(t *structure.Table, row *structure.Row, set Set) error {
 func checkCondition(value interface{}, cond *structure.Condition) (bool, error) {
 	switch v := value.(type) {
 	case int:
-		if !lib.CompareInt(v, cond.Operator, cond.Value) {
-			return false, nil
+		if lib.CompareInt(v, cond.Operator, cond.Value) {
+			return true, nil
 		}
-		return true, nil
+		return false, nil
 	case float64:
-		if !lib.CompareFloat64(v, cond.Operator, cond.Value) {
-			return false, nil
+		if lib.CompareFloat64(v, cond.Operator, cond.Value) {
+			return true, nil
 		}
-		return true, nil
+		return false, nil
 
 	case string:
-		if !lib.CompareString(v, cond.Operator, cond.Value) {
-			return false, nil
+		if lib.CompareString(v, cond.Operator, cond.Value) {
+			return true, nil
 		}
-		return true, nil
+		return false, nil
 	// Add more cases for other types as needed
 	default:
 		return false, errors.New("unsupported data type for comparison: " + reflect.TypeOf(value).String())

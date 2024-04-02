@@ -73,7 +73,7 @@ func (dc *DatabaseConnetion) Execute(sqltext string) error {
 	if err != nil {
 		return err
 	}
-	response := make([]byte, 1024)
+	response := make([]byte, 10240)
 	n, err := dc.conn.Read(response)
 	if err != nil {
 		fmt.Println("Error reading response:", err)

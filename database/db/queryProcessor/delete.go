@@ -5,9 +5,10 @@ import (
 	"fmt"
 )
 
-func (q *QueryManager) DeleteRow(conditions []structure.Condition) error {
+func (q *QueryManager) DeleteRow(conditions []structure.Condition) ([][]*structure.Row, error) {
+	var delete_rows [][]*structure.Row = [][]*structure.Row{}
 	if q.Table == nil {
-		return fmt.Errorf("table is nil")
+		return nil, fmt.Errorf("table is nil")
 	}
 	var mappingColumn map[string]int = make(map[string]int)
 	for i, column := range q.CurrentColumns {
@@ -18,16 +19,16 @@ func (q *QueryManager) DeleteRow(conditions []structure.Condition) error {
 		row := q.Table.Rows[i]
 		for _, cond := range conditions {
 			if passed, _ := checkCondition(row.Data[mappingColumn[cond.ColumnName]], &cond); passed {
+				delete_rows = append(delete_rows, []*structure.Row{&q.Table.Rows[i]})
 				q.Table.Rows = append(q.Table.Rows[:i], q.Table.Rows[i+1:]...)
 				if err := deleteFromIndex(q.Table, row); err != nil {
-					return err
+					return nil, err
 				}
 			}
 		}
-
 	}
 
-	return nil
+	return delete_rows, nil
 }
 
 func deleteFromIndex(t *structure.Table, row structure.Row) error {

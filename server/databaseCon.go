@@ -14,22 +14,34 @@ type Access struct {
 
 func main() {
 	start := time.Now()
-	databaseConn, err := dbconn.Connect("5432", "tin", "1234", "1m")
+	databaseConn, err := dbconn.Connect("5432", "tin", "1234", "A_user")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	message := `Select * From employee 
-				Where id = 50000 
+
+	message1 := `Delete From user
+				Where id = 37
 				$`
-	err = databaseConn.Execute(message)
+	message2 := `Insert Into user
+				 Value ( 37,'Job',20,'male','job@gmail.com' )
+				$`
+	message3 := `Select fullName From user
+				Where age < 50
+				$`
+
+	fmt.Println("====")
+	err = databaseConn.Execute(message1)
 	if err != nil {
 		fmt.Println(err)
 	}
-	message2 := `Select * From salary  
-				Where employee_id = 50000 
-				$`
+	fmt.Println("====")
 	err = databaseConn.Execute(message2)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("====")
+	err = databaseConn.Execute(message3)
 	if err != nil {
 		fmt.Println(err)
 	}

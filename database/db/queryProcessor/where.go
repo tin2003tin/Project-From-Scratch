@@ -8,7 +8,6 @@ import (
 
 // QueryRows returns rows from the table that match the specified conditions
 func (q *QueryManager) Where(conditions *[]structure.Condition) ([][]*structure.Row, error) {
-
 	var mappingColumn map[string]int = make(map[string]int)
 	for i, column := range q.CurrentColumns {
 		mappingColumn[column.Name] = i
@@ -37,7 +36,7 @@ func (q *QueryManager) Where(conditions *[]structure.Condition) ([][]*structure.
 
 func (q *QueryManager) findwithPointer(cond *structure.Condition, rows *[][]*structure.Row, rowindex int, realindex int) ([]*structure.Row, error) {
 	var matchedRows [][]*structure.Row
-	if !(q.hasColumn(cond.ColumnName)) {
+	if !(q.hasColumnC(cond.ColumnName)) {
 		return nil, errors.New(cond.ColumnName + " is not found in this table")
 	}
 	for _, t_row := range *rows {
@@ -47,6 +46,7 @@ func (q *QueryManager) findwithPointer(cond *structure.Condition, rows *[][]*str
 		if err != nil {
 			return nil, err
 		}
+
 		matched = m
 		if matched {
 			matchedRows = append(matchedRows, t_row)
@@ -61,7 +61,7 @@ func (q *QueryManager) findwithoutPointer(conditions *[]structure.Condition, row
 	for _, row := range *rows {
 		matched := true
 		for _, cond := range *conditions {
-			if !(q.hasColumn(cond.ColumnName)) {
+			if !(q.hasColumnC(cond.ColumnName)) {
 				return nil, errors.New(cond.ColumnName + " is not found in this table")
 			}
 			value := row.Data[mappingColumn[cond.ColumnName]]
@@ -71,7 +71,7 @@ func (q *QueryManager) findwithoutPointer(conditions *[]structure.Condition, row
 			}
 			matched = m
 		}
-		// If the row matches all conditions, add it to the matchedRows slice
+
 		if matched {
 			table_matchedRows = append(table_matchedRows, []*structure.Row{&row})
 		}

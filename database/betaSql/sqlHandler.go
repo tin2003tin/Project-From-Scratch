@@ -1,16 +1,10 @@
 package betasql
 
 import (
-	"database/betaSql/lib"
-	"database/db/queryProcessor"
-	buffermanager "database/db/storageManager/bufferManager"
-	"database/db/structure"
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
-	"sync"
-	"time"
 )
 
 func (sdb *SelectDatabase) loadColumn(item [][]string) ([][]string, error) {
@@ -91,138 +85,4 @@ func (sdb *SelectDatabase) loadJoin(item [][]string) ([][]string, error) {
 	join = append(join, item[1][0], item[2][0], item[4][0])
 	return [][]string{join}, nil
 
-}
-
-func (sdb *SelectDatabase) loadSql(item [][]string) ([][]string, error) {
-	startLoadDatabase := time.Now()
-	fmt.Println(item)
-	_select := item[4]
-	_from := item[2]
-	_where := item[0]
-	_join := item[1]
-	var err error
-	var wg sync.WaitGroup
-	var table1 *structure.Table
-	var table2 *structure.Table
-	if _, ok := sdb.DataBase.Registry.Tables[_from[0]]; !ok {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			table1, err = buffermanager.LoadTableMetadata(sdb.DataBase, _from[0])
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-
-			err = buffermanager.LoadIndex(table1)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-
-			err = buffermanager.LoadRawData(table1)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-
-			err = buffermanager.BuildIndex(table1)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			queryProcessor.NewQueryManager(table1)
-		}()
-	} else {
-		table1 = sdb.DataBase.Registry.Tables[_from[0]]
-	}
-
-	if _join[0] != "nil" {
-		if _, ok := sdb.DataBase.Registry.Tables[_join[3]]; !ok {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				table2, err = buffermanager.LoadTableMetadata(sdb.DataBase, _join[3])
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-
-				err = buffermanager.LoadIndex(table2)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-
-				err = buffermanager.LoadRawData(table2)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-
-				err = buffermanager.BuildIndex(table2)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-			}()
-		} else {
-			table2 = sdb.DataBase.Registry.Tables[_join[3]]
-		}
-	}
-
-	wg.Wait()
-	queryTable1 := queryProcessor.NewQueryManager(table1)
-	if _join[0] != "nil" {
-		queryTable1.JoinWithIndex(table2, structure.InnerJoin, structure.On{Self: _join[0], Operator: _join[1], Another: _join[2]})
-	}
-
-	if _where[0] != "nil" {
-		var where_value interface{} = _where[0]
-		switch _where[1] {
-		case "number":
-			numVal, err := strconv.Atoi(_where[0])
-			if err != nil {
-				return nil, err
-			}
-			where_value = numVal
-		}
-		cond := structure.Condition{ColumnName: _where[3], Operator: _where[2], Value: where_value}
-		_, err := queryTable1.Where(&[]structure.Condition{cond})
-		if err != nil {
-			fmt.Println("test")
-			return nil, err
-		}
-		// queryTable1.WhereWithIndex(&[]structure.Condition{cond})
-	}
-
-	queryTable1.PrintAsTable()
-	var selectedRows []map[string]interface{}
-	if _select[0] == "*" {
-		s, err := queryTable1.Select(true, nil)
-		if err != nil {
-			return nil, err
-		}
-		selectedRows = s
-	} else {
-		var selectedcolumn []string
-		selectedcolumn = append(selectedcolumn, _select...)
-		s, err := queryTable1.Select(false, selectedcolumn)
-		if err != nil {
-			fmt.Println(err)
-			return nil, err
-		}
-		selectedRows = s
-	}
-	json, err := lib.ConvertToJson(selectedRows)
-	if err != nil {
-		return nil, err
-	}
-	sdb.Output = &json
-	// fmt.Println(_select)
-	// fmt.Println(_from)
-	// fmt.Println(_where)
-	loadDuration := time.Since(startLoadDatabase)
-	fmt.Println("Execution Time for only Excute:", loadDuration)
-	return nil, nil
 }

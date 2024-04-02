@@ -68,3 +68,15 @@ func (app *App) LoadMetaDatabase(databaseFolder string) error {
 func (app *App) InitCompiler() {
 	app.SqlCompliler = betasql.InitSqlCompiler()
 }
+
+func (app *App) LoadTableMetadata() {
+	for i := range app.LoadedDatabase {
+		for _, table := range app.LoadedDatabase[i].TableNames {
+			_, err := buffermanager.LoadTableMetadata(&app.LoadedDatabase[i], table)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}
+	}
+}

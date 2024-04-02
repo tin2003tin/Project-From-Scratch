@@ -7,9 +7,9 @@ import (
 )
 
 func (q *QueryManager) PrintAsTable() {
-	if q.CurrentRows == nil {
-		q.Where(&[]structure.Condition{})
-	}
+	// if q.CurrentRows == nil {
+	// 	q.Where(&[]structure.Condition{})
+	// }
 	// Calculate column widths
 	columns := q.CurrentColumns
 	rows := q.CurrentRows

@@ -2,18 +2,17 @@ package queryProcessor
 
 import (
 	"database/db/lib"
-	"database/db/structure"
 	"fmt"
 )
 
 func (q *QueryManager) Select(all bool, colNames []string) ([]map[string]interface{}, error) {
-	if q.CurrentRows == nil {
-		currRows, err := q.Where(&[]structure.Condition{})
-		if err != nil {
-			return nil, err
-		}
-		q.CurrentRows = currRows
-	}
+	// if q.CurrentRows == nil {
+	// 	currRows, err := q.Where(&[]structure.Condition{})
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	q.CurrentRows = currRows
+	// }
 	var selectedIndex []int = []int{}
 
 	if all {

@@ -40,10 +40,10 @@ func (p *LRParser) Parse(input []Token) error {
 
 		token := p.input[0].Type
 		action, ok := p.Lrt.States[state].LrAction[token]
-		// for _, i := range p.stack.Item {
-		// 	fmt.Print(i.Value(), " ")
-		// }
-		// fmt.Println()
+		for _, i := range p.stack.Item {
+			fmt.Print(i.Value(), " ")
+		}
+		fmt.Println()
 		if !ok {
 			return fmt.Errorf("cannot find action")
 		}

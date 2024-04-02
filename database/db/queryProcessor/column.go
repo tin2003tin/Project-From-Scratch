@@ -77,8 +77,17 @@ func (q *QueryManager) addPrimaryKey(name string) {
 	q.Table.Metadata.PrimaryKeys = append(q.Table.Metadata.PrimaryKeys, name)
 }
 
-func (q *QueryManager) hasColumn(columnName string) bool {
+func (q *QueryManager) hasColumnT(columnName string) bool {
 	for _, col := range q.Table.Columns {
+		if col.Name == columnName {
+			return true
+		}
+	}
+	return false
+}
+
+func (q *QueryManager) hasColumnC(columnName string) bool {
+	for _, col := range q.CurrentColumns {
 		if col.Name == columnName {
 			return true
 		}
